@@ -73,7 +73,7 @@ export default async function AthleteDashboard() {
               )}
             </div>
           </div>
-          <Link href="/athlete/profile" className="btn-ghost text-sm py-2.5 shrink-0">
+          <Link href="/athlete/profile" className="border-[1.5px] border-slate-200 text-slate-900 bg-transparent hover:bg-slate-100 hover:border-slate-300 rounded-full font-semibold transition-all inline-flex px-4 text-sm py-2.5 shrink-0">
             Edit Profile
           </Link>
         </div>

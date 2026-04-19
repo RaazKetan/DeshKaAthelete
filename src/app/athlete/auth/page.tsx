@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import BackButton from "@/components/BackButton";
+
 const HIGHLIGHTS = [
   { icon: Zap, text: "₹2 Cr+ paid to players" },
   { icon: ShieldCheck, text: "Escrow-guaranteed payments" },
@@ -42,7 +44,7 @@ export default function AthleteAuth() {
             <h1 className="text-4xl font-extrabold text-white leading-tight mb-4">
               Your game built your reputation.
               <br />
-              <span className="gradient-text">Let it earn too.</span>
+              <span className="bg-gradient-to-br from-green-600 to-green-400 bg-clip-text text-transparent">Let it earn too.</span>
             </h1>
             <p className="text-slate-400 text-lg leading-relaxed">
               Join India&apos;s first verified marketplace connecting elite sports players — 
@@ -81,8 +83,10 @@ export default function AthleteAuth() {
 
       {/* Right Auth Panel */}
       <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-6 md:p-12">
-        {/* Mobile logo */}
-        <Link href="/" className="lg:hidden flex items-center gap-2 mb-10">
+        <div className="w-full max-w-md">
+          <BackButton />
+          {/* Mobile logo */}
+          <Link href="/" className="lg:hidden flex items-center gap-2 mb-10 mt-6">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-green-600 to-green-400 flex items-center justify-center font-bold text-white">
             DA
           </div>
@@ -123,6 +127,7 @@ export default function AthleteAuth() {
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 }

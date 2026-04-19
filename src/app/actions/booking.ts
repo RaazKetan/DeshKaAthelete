@@ -17,18 +17,20 @@ export async function createBooking(formData: FormData, athleteId: string) {
 
   const dateTime = new Date(`${dateStr}T${timeStr}`);
 
-  // Create or get a dummy school
-  let school = await prisma.school.findFirst({
-    where: { name: "Delhi Public School, Bangalore South" }
+  const { cookies } = await import("next/headers");
+  const cookieStore = await cookies();
+  const schoolId = cookieStore.get("auth_school_id")?.value;
+
+  if (!schoolId) {
+    throw new Error("You must be logged in as a school to book an athlete.");
+  }
+
+  const school = await prisma.school.findUnique({
+    where: { id: schoolId }
   });
 
   if (!school) {
-    school = await prisma.school.create({
-      data: {
-        name: "Delhi Public School, Bangalore South",
-        city: "Bangalore"
-      }
-    });
+    throw new Error("Invalid school session.");
   }
 
   // Create a session

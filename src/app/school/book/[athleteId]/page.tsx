@@ -5,9 +5,10 @@ import SchoolBookAthleteClient from "./client-page";
 export default async function SchoolBookAthlete({
   params
 }: {
-  params: { athleteId: string };
+  params: Promise<{ athleteId: string }>;
 }) {
-  const athlete = await prisma.athlete.findUnique({ where: { id: params.athleteId } });
+  const resolvedParams = await params;
+  const athlete = await prisma.athlete.findUnique({ where: { id: resolvedParams.athleteId } });
 
   if (!athlete) {
     notFound();

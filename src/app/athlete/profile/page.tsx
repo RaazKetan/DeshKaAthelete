@@ -34,7 +34,7 @@ export default async function AthleteProfile() {
           <div className="flex gap-3">
             <button
               id="copy-profile-link"
-              className="btn-ghost text-sm py-2.5 flex items-center gap-2"
+              className="border-[1.5px] border-slate-200 text-slate-900 bg-transparent hover:bg-slate-100 hover:border-slate-300 rounded-full font-semibold transition-all inline-flex text-sm py-2.5 px-4 items-center gap-2"
             >
               <Copy className="w-4 h-4" />
               <span className="hidden sm:inline">Copy Profile Link</span>

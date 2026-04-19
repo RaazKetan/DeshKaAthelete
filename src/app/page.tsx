@@ -147,7 +147,7 @@ export default function Home() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
         className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-          scrolled ? "glass-nav shadow-sm" : "bg-transparent"
+          scrolled ? "bg-slate-50/90 backdrop-blur-xl border-b border-slate-200 shadow-sm" : "bg-transparent"
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
@@ -228,7 +228,7 @@ export default function Home() {
             transition={{ delay: 0.2, duration: 0.5 }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-200 bg-white/80 backdrop-blur-sm mb-8 shadow-sm"
           >
-            <span className="w-2 h-2 rounded-full bg-green-500 pulse-dot" />
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse-dot" />
             <span className="text-xs font-bold tracking-widest text-green-700 uppercase">Now Live in Bangalore · Mumbai · Delhi</span>
           </motion.div>
 
@@ -242,7 +242,7 @@ export default function Home() {
             <motion.span variants={fadeUp} custom={0} className="block">
               Elite Mentorship by
             </motion.span>
-            <motion.span variants={fadeUp} custom={1} className="block gradient-text pb-2">
+            <motion.span variants={fadeUp} custom={1} className="block bg-gradient-to-br from-green-600 to-green-400 bg-clip-text text-transparent pb-2">
               India's Greatest
             </motion.span>
             <motion.span variants={fadeUp} custom={2} className="block">
@@ -286,11 +286,11 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1, duration: 0.5 }}
           >
-            <Link href="/school/athletes" className="btn-primary hover:scale-105 transition-transform justify-center">
+            <Link href="/school/athletes" className="bg-gradient-to-br from-green-600 to-green-500 text-white shadow-[0_4px_20px_rgba(22,163,74,0.3)] hover:shadow-[0_8px_30px_rgba(22,163,74,0.4)] transition-all hover:-translate-y-1 inline-flex items-center gap-2 px-8 py-3.5 rounded-full font-bold justify-center">
               Browse Athletes
               <ArrowRight className="w-5 h-5" />
             </Link>
-            <Link href="/athlete/auth" className="btn-ghost justify-center">
+            <Link href="/athlete/auth" className="border-[1.5px] border-slate-200 text-slate-900 bg-transparent hover:bg-slate-100 hover:border-slate-300 px-8 py-3.5 rounded-full font-semibold transition-all inline-flex items-center gap-2 justify-center">
               <Medal className="w-5 h-5 text-green-600" />
               Join as an Athlete
             </Link>
@@ -365,7 +365,7 @@ export default function Home() {
       </section>
 
       {/* ── How It Works ── */}
-      <section id="how" className="py-24 bg-white">
+      <section id="how" className="py-24 bg-white scroll-mt-20">
         <div className="max-w-7xl mx-auto px-6">
           <motion.div
             className="text-center mb-16"
@@ -378,7 +378,7 @@ export default function Home() {
               Simple Process
             </div>
             <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-4">
-              Book a Session in <span className="gradient-text">3 Easy Steps</span>
+              Book a Session in <span className="bg-gradient-to-br from-green-600 to-green-400 bg-clip-text text-transparent">3 Easy Steps</span>
             </h2>
             <p className="text-slate-500 text-lg max-w-xl mx-auto">
               From browsing athletes to confirmed session — takes under 5 minutes.
@@ -413,7 +413,7 @@ export default function Home() {
       </section>
 
       {/* ── Trust & Safety ── */}
-      <section id="trust" className="py-24 bg-gradient-to-b from-slate-50 to-white">
+      <section id="trust" className="py-24 bg-gradient-to-b from-slate-50 to-white scroll-mt-20">
         <div className="max-w-7xl mx-auto px-6">
           <motion.div
             className="text-center mb-16"
@@ -427,7 +427,7 @@ export default function Home() {
               <span className="text-xs font-bold text-green-700 uppercase tracking-widest">Trust & Safety</span>
             </div>
             <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-4">
-              Built for Schools That Need to <span className="gradient-text">Trust Every Step</span>
+              Built for Schools That Need to <span className="bg-gradient-to-br from-green-600 to-green-400 bg-clip-text text-transparent">Trust Every Step</span>
             </h2>
             <p className="text-slate-500 text-lg max-w-2xl mx-auto">
               We know schools are accountable to parents, principals, and boards.
@@ -480,7 +480,7 @@ export default function Home() {
       </section>
 
       {/* ── Athlete CTA Section ── */}
-      <section id="athletes" className="py-24 bg-slate-900 relative overflow-hidden">
+      <section id="athletes" className="py-24 bg-slate-900 relative overflow-hidden scroll-mt-20">
         <div className="absolute inset-0 -z-0">
           <div className="absolute top-0 left-1/3 w-[600px] h-[400px] bg-green-500/10 rounded-full blur-[120px]" />
           <div className="absolute bottom-0 right-1/3 w-[400px] h-[300px] bg-emerald-500/12 rounded-full blur-[100px]" />
@@ -499,7 +499,7 @@ export default function Home() {
                 <span className="text-xs font-bold tracking-widest text-green-400 uppercase">For Athletes</span>
               </div>
               <h2 className="text-4xl md:text-5xl font-black text-white mb-6 leading-[1.1]">
-                Turn your <span className="gradient-text">sporting legacy</span> into meaningful income.
+                Turn your <span className="bg-gradient-to-br from-green-600 to-green-400 bg-clip-text text-transparent">sporting legacy</span> into meaningful income.
               </h2>
               <p className="text-slate-400 text-lg mb-8 leading-relaxed">
                 If you&apos;ve competed at national or international level in any sport — schools across India
@@ -613,9 +613,9 @@ export default function Home() {
             <div>
               <h4 className="font-bold text-white text-sm mb-4 uppercase tracking-wider">Legal</h4>
               <ul className="space-y-2.5 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Refund Policy</a></li>
+                <li><Link href="/policy/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/policy/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                <li><Link href="/policy/refund" className="hover:text-white transition-colors">Refund Policy</Link></li>
               </ul>
             </div>
           </div>

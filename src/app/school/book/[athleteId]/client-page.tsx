@@ -34,7 +34,7 @@ export default function SchoolBookAthleteClient({
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-20 selection:bg-green-500/30">
       {/* Navigation */}
-      <nav className="sticky top-0 w-full z-50 glass-nav">
+      <nav className="sticky top-0 w-full z-50 bg-slate-50/90 backdrop-blur-xl border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center">
           <Link href="/school/athletes" className="flex items-center gap-2 hover:opacity-80 transition-opacity text-slate-600 hover:text-slate-900 font-medium">
             <ArrowLeft className="w-5 h-5" />
@@ -130,7 +130,7 @@ export default function SchoolBookAthleteClient({
               ></textarea>
             </div>
 
-            <button type="submit" disabled={isSubmitting} className="btn-primary w-full py-4 text-lg mt-4 flex items-center justify-center gap-2">
+            <button type="submit" disabled={isSubmitting} className="bg-gradient-to-br from-green-600 to-green-500 text-white shadow-[0_4px_20px_rgba(22,163,74,0.3)] hover:shadow-[0_8px_30px_rgba(22,163,74,0.4)] transition-all hover:-translate-y-1 rounded-full font-bold w-full py-4 text-lg mt-4 flex items-center justify-center gap-2">
                {isSubmitting ? "Loading..." : "Deposit to Escrow & Request"}
             </button>
             <p className="text-xs text-center text-slate-500 mt-3 flex items-center justify-center gap-1">
