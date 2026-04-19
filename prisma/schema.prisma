@@ -1,0 +1,72 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Athlete {
+  id             String    @id @default(cuid())
+  name           String
+  sport          String
+  bio            String?
+  achievements   String[]
+  pricingSession   Int       @default(10000) // Default 10k INR
+  isVerified       Boolean   @default(false)
+  avatarUrl        String?
+  aadhaarLastFour  String?   // For basic Indian identity proof
+  federationId     String?   // AFI, BAI, HI ID etc
+  kheloIndiaId     String?   
+  verificationDocs String[]  // Array of S3/Cloud URLs to certificates
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  bookings         Booking[]
+}
+
+model School {
+  id        String    @id @default(cuid())
+  name      String
+  city      String
+  contact   String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  bookings  Booking[]
+}
+
+model Session {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  durationMin Int      @default(60)
+  type        String   // e.g. "Workshop", "Talk", "Training"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  bookings    Booking[]
+}
+
+model Booking {
+  id        String   @id @default(cuid())
+  athleteId String
+  schoolId  String
+  sessionId String
+  date         DateTime
+  status       String   @default("PENDING") // PENDING, CONFIRMED, COMPLETED
+  audienceSize Int?     // Number of students
+  schoolType   String?  // e.g. CBSE, ICSE, University
+  schoolNote   String?  // Direct message/context from the principal
+
+  athlete   Athlete  @relation(fields: [athleteId], references: [id])
+  school    School   @relation(fields: [schoolId], references: [id])
+  session   Session  @relation(fields: [sessionId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
