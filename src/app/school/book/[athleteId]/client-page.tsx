@@ -5,6 +5,7 @@ import { ArrowLeft, ShieldCheck, CreditCard, CalendarDays, Clock, Trophy, Users,
 import Link from "next/link";
 import { createBooking } from "@/app/actions/booking";
 import { useRouter } from "next/navigation";
+import Alert from "@/components/Alert";
 
 // Client Component to handle form submission
 export default function SchoolBookAthleteClient({
@@ -13,26 +14,34 @@ export default function SchoolBookAthleteClient({
   athlete: any
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [alertInfo, setAlertInfo] = useState<{type: "error" | "success" | "info", message: string} | null>(null);
   const router = useRouter();
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSubmitting(true);
+    setAlertInfo(null);
     const formData = new FormData(event.currentTarget);
     try {
       await createBooking(formData, athlete.id);
-      alert("Booking Request Sent to Escrow!");
-      router.push("/school/dashboard");
-    } catch (e) {
+      setAlertInfo({ type: "success", message: "Booking Request Sent to Escrow!" });
+      setTimeout(() => {
+        router.push("/school/dashboard");
+      }, 1500);
+    } catch (e: any) {
       console.error(e);
-      alert("Failed to submit.");
-    } finally {
+      setAlertInfo({ type: "error", message: e.message || "Failed to submit request." });
       setIsSubmitting(false);
     }
   }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-20 selection:bg-green-500/30">
+      {alertInfo && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-md shadow-2xl animate-in slide-in-from-top-4 fade-in duration-300">
+          <Alert type={alertInfo.type} message={alertInfo.message} onClose={() => setAlertInfo(null)} />
+        </div>
+      )}
       {/* Navigation */}
       <nav className="sticky top-0 w-full z-50 bg-slate-50/90 backdrop-blur-xl border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center">
@@ -155,7 +164,7 @@ export default function SchoolBookAthleteClient({
             </div>
 
             <div className="mb-6 space-y-2">
-               {athlete.achievements.map((ach: string, i: number) => (
+               {athlete.achievements && athlete.achievements.map((ach: string, i: number) => (
                  <div key={i} className="flex gap-2 items-start text-sm text-white/70">
                    <Trophy className="w-4 h-4 text-green-400 shrink-0 mt-0.5" />
                    {ach}

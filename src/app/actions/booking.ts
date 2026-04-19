@@ -38,7 +38,7 @@ export async function createBooking(formData: FormData, athleteId: string) {
     data: {
       title: `${type} with Athlete`,
       description: schoolNote || "",
-      type: type,
+      type,
     }
   });
 

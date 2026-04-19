@@ -9,9 +9,10 @@ import {
   IndianRupee,
   ShieldCheck,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { onboardAthlete } from "@/app/actions/athlete";
 import Link from "next/link";
+import Alert from "@/components/Alert";
 
 const SPORTS = [
   "Cricket", "Football", "Hockey (Field)", "Badminton", "Athletics",
@@ -50,7 +51,11 @@ const STEPS = [
 export default function AthleteOnboarding() {
   const [step, setStep] = useState(1);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const usernameParam = searchParams.get("username") || "";
+
   const [formData, setFormData] = useState({
+    username: usernameParam,
     name: "",
     sport: "",
     aadhaarLastFour: "",
@@ -62,6 +67,7 @@ export default function AthleteOnboarding() {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleNext = () => setStep((s) => s + 1);
   const handleBack = () => setStep((s) => s - 1);
@@ -77,7 +83,9 @@ export default function AthleteOnboarding() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
+    setErrorMsg("");
     const data = new FormData();
+    data.append("username", formData.username);
     data.append("name", formData.name);
     data.append("sport", formData.sport);
     data.append("aadhaarLastFour", formData.aadhaarLastFour);
@@ -86,10 +94,10 @@ export default function AthleteOnboarding() {
     data.append("pricingSession", formData.pricingSession);
     try {
       await onboardAthlete(data);
-      router.push("/athlete/onboarding/success");
-    } catch (e) {
+      router.push("/athlete/dashboard");
+    } catch (e: any) {
       console.error(e);
-      alert("Error submitting profile.");
+      setErrorMsg(e.message || "Error submitting profile.");
     } finally {
       setIsSubmitting(false);
     }
@@ -100,6 +108,11 @@ export default function AthleteOnboarding() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-20 selection:bg-green-500/30">
+      {errorMsg && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] w-[90%] max-w-md shadow-2xl">
+          <Alert type="error" message={errorMsg} onClose={() => setErrorMsg("")} />
+        </div>
+      )}
       {/* Top Nav */}
       <nav className="sticky top-0 w-full z-50 bg-white border-b border-slate-200">
         <div className="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">

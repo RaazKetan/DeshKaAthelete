@@ -27,15 +27,14 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, sport, bio, achievements, pricingSession } = body;
+    const { name, sport, bio, pricingSession } = body;
 
     const newAthlete = await prisma.athlete.create({
       data: {
         name,
         sport,
         bio,
-        achievements: achievements || [],
-        pricingSession: pricingSession || 10000,
+        pricingSession: pricingSession ?? 10000,
         isVerified: false, // Must be verified by admin later
       }
     });

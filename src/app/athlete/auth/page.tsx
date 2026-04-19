@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import BackButton from "@/components/BackButton";
+import Alert from "@/components/Alert";
 
 const HIGHLIGHTS = [
   { icon: Zap, text: "₹2 Cr+ paid to players" },
@@ -15,7 +16,7 @@ const HIGHLIGHTS = [
 ];
 
 export default function AthleteAuth() {
-  const [mode, setMode] = useState<"login" | "signup">("signup");
+  const [mode, setMode] = useState<"login" | "signup" | "forgot_password">("signup");
   const router = useRouter();
 
   return (
@@ -122,8 +123,10 @@ export default function AthleteAuth() {
 
           {mode === "signup" ? (
             <SignupCard onContinue={() => router.push("/athlete/onboarding")} />
+          ) : mode === "login" ? (
+            <LoginCard onLogin={() => router.push("/athlete/dashboard")} onForgotPassword={() => setMode("forgot_password")} />
           ) : (
-            <LoginCard onLogin={() => router.push("/athlete/dashboard")} />
+            <ForgotPasswordCard onBack={() => setMode("login")} />
           )}
         </div>
       </div>
@@ -133,18 +136,80 @@ export default function AthleteAuth() {
 }
 
 function SignupCard({ onContinue }: { onContinue: () => void }) {
+  const [username, setUsername] = useState("");
+  const [isTaken, setIsTaken] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function handleUsernameBlur() {
+    if (!username || username.length < 3) return;
+    setIsValidating(true);
+    const { checkUsername } = await import("@/app/actions/athleteAuth");
+    const taken = await checkUsername(username);
+    setIsTaken(taken);
+    setIsValidating(false);
+  }
+
+  async function handleSignup(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (isTaken || isValidating) return;
+    
+    setIsSubmitting(true);
+    setErrorMsg("");
+    try {
+      const formData = new FormData(e.currentTarget);
+      const { registerAthlete } = await import("@/app/actions/athleteAuth");
+      await registerAthlete(formData);
+      onContinue();
+    } catch (err: any) {
+      setErrorMsg(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
-    <div className="space-y-6">
+    <form onSubmit={handleSignup} className="space-y-6">
       <div>
         <h2 className="text-2xl font-extrabold text-slate-900 mb-1">Join as a Player</h2>
-        <p className="text-slate-500 text-sm">It takes 5 minutes. Manual KYC ensures only verified players get listed.</p>
+        <p className="text-slate-500 text-sm mb-4">It takes 5 minutes. Manual KYC ensures only verified players get listed.</p>
+        
+        {isTaken && (
+          <div className="mb-4">
+             <Alert type="error" message={`Username @${username} is already taken. Please pick another.`} onClose={() => setIsTaken(false)} />
+          </div>
+        )}
+        {errorMsg && (
+          <div className="mb-4">
+             <Alert type="error" message={errorMsg} onClose={() => setErrorMsg("")} />
+          </div>
+        )}
       </div>
 
       <div className="space-y-4">
         <div className="space-y-1.5">
+          <label className="block text-sm font-bold text-slate-700">Username</label>
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">@</span>
+            <input
+              name="username"
+              required
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+              onBlur={handleUsernameBlur}
+              placeholder="your_username"
+              className={`w-full border rounded-xl pl-8 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all font-medium ${isTaken ? 'border-red-300 bg-red-50' : 'border-slate-200'} ${isValidating ? 'opacity-50' : ''}`}
+            />
+          </div>
+          <p className="text-xs text-slate-400">Must be unique (only lowercase, numbers, underscores).</p>
+        </div>
+        <div className="space-y-1.5">
           <label className="block text-sm font-bold text-slate-700">Full Name</label>
           <input
-            id="signup-name"
+            name="name"
+            required
             type="text"
             placeholder="As per Aadhaar card"
             className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all font-medium"
@@ -155,7 +220,8 @@ function SignupCard({ onContinue }: { onContinue: () => void }) {
           <div className="flex gap-2">
             <span className="border border-slate-200 rounded-xl px-3 py-3 text-sm text-slate-500 font-medium bg-slate-50">+91</span>
             <input
-              id="signup-phone"
+              name="phone"
+              required
               type="tel"
               placeholder="9876543210"
               className="flex-1 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all font-medium"
@@ -163,9 +229,20 @@ function SignupCard({ onContinue }: { onContinue: () => void }) {
           </div>
         </div>
         <div className="space-y-1.5">
+          <label className="block text-sm font-bold text-slate-700">Password</label>
+          <input
+            name="password"
+            required
+            type="password"
+            placeholder="Create a strong password"
+            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all font-medium"
+          />
+        </div>
+        <div className="space-y-1.5">
           <label className="block text-sm font-bold text-slate-700">Primary Sport</label>
           <select
-            id="signup-sport"
+            name="sport"
+            required
             className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all font-medium bg-white"
           >
             <option value="">Select your primary sport</option>
@@ -194,66 +271,238 @@ function SignupCard({ onContinue }: { onContinue: () => void }) {
       </div>
 
       <button
-        id="signup-continue-btn"
-        onClick={onContinue}
-        className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 transition-colors"
+        type="submit"
+        disabled={isValidating || isTaken || !username || isSubmitting}
+        className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 disabled:opacity-40 transition-colors"
       >
-        Continue to KYC Onboarding <ArrowRight className="w-4 h-4" />
+        {isSubmitting ? "Creating Account..." : "Continue to KYC Onboarding"} <ArrowRight className="w-4 h-4" />
       </button>
 
       <p className="text-center text-xs text-slate-400">
         By continuing, you agree to DeshKa Athlete&apos;s Terms of Service and Privacy Policy.
       </p>
-    </div>
+    </form>
   );
 }
 
-function LoginCard({ onLogin }: { onLogin: () => void }) {
+function LoginCard({ onLogin, onForgotPassword }: { onLogin: () => void, onForgotPassword: () => void }) {
+  const [errorMsg, setErrorMsg] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setErrorMsg("");
+    try {
+      const formData = new FormData(e.currentTarget);
+      const { loginAthlete } = await import("@/app/actions/athleteAuth");
+      await loginAthlete(formData);
+      onLogin();
+    } catch (err: any) {
+      setErrorMsg(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <div className="space-y-6">
+    <form onSubmit={handleLogin} className="space-y-6">
       <div>
         <h2 className="text-2xl font-extrabold text-slate-900 mb-1">Welcome back</h2>
-        <p className="text-slate-500 text-sm">
+        <p className="text-slate-500 text-sm mb-4">
           Log in to your player dashboard to manage bookings and earnings.
         </p>
+        {errorMsg && (
+          <div className="mb-4">
+             <Alert type="error" message={errorMsg} onClose={() => setErrorMsg("")} />
+          </div>
+        )}
       </div>
 
       <div className="space-y-4">
         <div className="space-y-1.5">
-          <label className="block text-sm font-bold text-slate-700">Mobile Number</label>
+          <label className="block text-sm font-bold text-slate-700">Username or Mobile</label>
           <div className="flex gap-2">
-            <span className="border border-slate-200 rounded-xl px-3 py-3 text-sm text-slate-500 font-medium bg-slate-50">+91</span>
             <input
-              id="login-phone"
-              type="tel"
-              placeholder="9876543210"
+              name="usernameOrPhone"
+              required
+              type="text"
+              placeholder="@username or 9876543210"
               className="flex-1 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all font-medium"
             />
           </div>
         </div>
         <div className="space-y-1.5">
-          <label className="block text-sm font-bold text-slate-700">OTP / Password</label>
+          <div className="flex items-center justify-between">
+            <label className="block text-sm font-bold text-slate-700">Password</label>
+            <button type="button" onClick={onForgotPassword} className="text-xs font-bold text-green-600 hover:underline">Forgot password?</button>
+          </div>
           <input
-            id="login-otp"
+            name="password"
             type="password"
-            placeholder="Enter OTP"
+            required
+            placeholder="Enter your password"
             className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all font-medium"
           />
         </div>
       </div>
 
       <button
-        id="login-btn"
-        onClick={onLogin}
-        className="w-full bg-green-600 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-green-700 transition-colors"
+        type="submit"
+        disabled={loading}
+        className="w-full bg-green-600 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-green-700 disabled:opacity-50 transition-colors"
       >
-        Log In to Dashboard <ArrowRight className="w-4 h-4" />
+        {loading ? "Logging in..." : "Log In to Dashboard"} <ArrowRight className="w-4 h-4" />
       </button>
 
       <p className="text-center text-xs text-slate-400">
         Don&apos;t have an account?{" "}
-        <button className="text-green-600 font-bold hover:underline">Sign up as a player</button>
+        <button type="button" className="text-green-600 font-bold hover:underline">Sign up as a player</button>
       </p>
-    </div>
+    </form>
+  );
+}
+
+function ForgotPasswordCard({ onBack }: { onBack: () => void }) {
+  const [step, setStep] = useState<1 | 2>(1);
+  const [phone, setPhone] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSendOtp(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setErrorMsg("");
+    try {
+      const { sendPasswordResetOtp } = await import("@/app/actions/athleteAuth");
+      const res = await sendPasswordResetOtp(phone);
+      if (res.success) {
+        setStep(2);
+        setSuccessMsg(res.message);
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleResetPassword(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setErrorMsg("");
+    try {
+      const formData = new FormData(e.currentTarget);
+      formData.append("phone", phone);
+      const { resetPasswordWithOtp } = await import("@/app/actions/athleteAuth");
+      const res = await resetPasswordWithOtp(formData);
+      if (res.success) {
+        alert("Password reset successfully! You can now log in.");
+        onBack();
+      }
+    } catch (err: any) {
+      setErrorMsg(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (step === 1) {
+    return (
+      <form onSubmit={handleSendOtp} className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-extrabold text-slate-900 mb-1">Reset Password</h2>
+          <p className="text-slate-500 text-sm mb-4">
+            Enter your registered mobile number to receive a 6-digit OTP.
+          </p>
+          {errorMsg && (
+            <div className="mb-4">
+              <Alert type="error" message={errorMsg} onClose={() => setErrorMsg("")} />
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="block text-sm font-bold text-slate-700">Mobile Number</label>
+            <input
+              type="text"
+              required
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="e.g. 9876543210"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all font-medium"
+            />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading || !phone}
+          className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 disabled:opacity-50 transition-colors"
+        >
+          {loading ? "Sending..." : "Send OTP"}
+        </button>
+
+        <button type="button" onClick={onBack} className="w-full text-center text-sm font-bold text-slate-500 hover:text-slate-900">
+          Cancel
+        </button>
+      </form>
+    );
+  }
+
+  return (
+    <form onSubmit={handleResetPassword} className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-extrabold text-slate-900 mb-1">Enter OTP</h2>
+        <p className="text-slate-500 text-sm mb-4">
+          {successMsg || "We sent a 6-digit OTP to your mobile number."}
+        </p>
+        <p className="text-xs font-bold text-blue-600 bg-blue-50 p-2 rounded max-w-max mb-4">
+          Dev Note: Check your server console for the mock OTP!
+        </p>
+        {errorMsg && (
+          <div className="mb-4">
+            <Alert type="error" message={errorMsg} onClose={() => setErrorMsg("")} />
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-4">
+        <div className="space-y-1.5">
+          <label className="block text-sm font-bold text-slate-700">6-Digit OTP</label>
+          <input
+            name="otp"
+            type="text"
+            required
+            placeholder="123456"
+            className="w-full tracking-widest border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all font-medium"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <label className="block text-sm font-bold text-slate-700">New Password</label>
+          <input
+            name="newPassword"
+            type="password"
+            required
+            placeholder="At least 6 characters"
+            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all font-medium"
+          />
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-green-600 text-white py-4 rounded-xl font-bold hover:bg-green-700 disabled:opacity-50 transition-colors"
+      >
+        {loading ? "Resetting..." : "Reset Password"}
+      </button>
+
+      <button type="button" onClick={onBack} className="w-full text-center text-sm font-bold text-slate-500 hover:text-slate-900">
+        Back to Login
+      </button>
+    </form>
   );
 }

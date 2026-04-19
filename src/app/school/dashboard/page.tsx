@@ -31,7 +31,7 @@ export default async function SchoolDashboard() {
   }
 
   const upcomingSessions = school.bookings.filter(b => b.status === "CONFIRMED" && b.date > new Date());
-  const pendingRequests = school.bookings.filter(b => b.status === "PENDING" || b.status === "PROCESSING_ESCROW");
+  const pendingRequests = school.bookings.filter(b => b.status === "PENDING");
 
   const escrowBalance = pendingRequests.reduce((sum, b) => sum + b.athlete.pricingSession, 0);
 

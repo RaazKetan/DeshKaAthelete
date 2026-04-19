@@ -5,6 +5,7 @@ import BackButton from "@/components/BackButton";
 
 export default async function SchoolAthletesDirectory() {
   const athletes = await prisma.athlete.findMany({
+    where: { isVerified: true },
     orderBy: { createdAt: 'desc' }
   });
 
@@ -50,7 +51,7 @@ export default async function SchoolAthletesDirectory() {
               </div>
 
               <div className="space-y-2 mb-6">
-                {athlete.achievements && athlete.achievements.map((ach: string, idx: number) => (
+                {athlete.achievements && athlete.achievements.slice(0, 3).map((ach: string, idx: number) => (
                   <div key={idx} className="bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-sm text-slate-600 shadow-sm">
                     {ach}
                   </div>
