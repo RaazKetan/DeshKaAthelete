@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -13,6 +13,16 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { onboardAthlete } from "@/app/actions/athlete";
 import Link from "next/link";
 import Alert from "@/components/Alert";
+
+// Wrap in Suspense so Next.js can statically prerender the shell
+export default function AthleteOnboardingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center"><div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin" /></div>}>
+      <AthleteOnboarding />
+    </Suspense>
+  );
+}
+
 
 const SPORTS = [
   "Cricket", "Football", "Hockey (Field)", "Badminton", "Athletics",
@@ -48,7 +58,7 @@ const STEPS = [
   { label: "Pricing" },
 ];
 
-export default function AthleteOnboarding() {
+function AthleteOnboarding() {
   const [step, setStep] = useState(1);
   const router = useRouter();
   const searchParams = useSearchParams();
