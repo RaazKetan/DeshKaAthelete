@@ -124,12 +124,12 @@ export default async function AthleteProfile() {
                   <input
                     id="profile-pricing"
                     type="number"
-                    defaultValue={athlete.pricingSession}
+                   defaultValue={Number(athlete.pricingSession)}
                     className="w-full border border-slate-200 rounded-xl py-3 pl-8 pr-4 focus:outline-none focus:ring-2 focus:ring-slate-900 text-slate-900 font-bold text-lg transition-all"
                   />
                 </div>
                 <p className="text-xs text-slate-400">
-                  For a 60-min session. Your payout: ₹{Math.round(athlete.pricingSession * 0.88).toLocaleString()} (after 12% platform fee).
+                  For a 60-min session. Your payout: ₹{Math.round(Number(athlete.pricingSession) * 0.88).toLocaleString()} (after 12% platform fee).
                 </p>
               </div>
             </div>
@@ -226,7 +226,7 @@ export default async function AthleteProfile() {
                     </div>
                     <div className="text-center">
                       <p className="font-extrabold text-slate-900">
-                        ₹{athlete.pricingSession.toLocaleString()}
+                        ₹{Number(athlete.pricingSession).toLocaleString()}
                       </p>
                       <p className="text-slate-400 text-xs">per session</p>
                     </div>

@@ -28,7 +28,7 @@ export default async function AthleteRequests({
   const statuses = statusMap[tab] ?? ["PENDING"];
 
   const bookings = await prisma.booking.findMany({
-    where: { athleteId: athlete.id, status: { in: statuses } },
+    where: { athleteId: athlete.id, status: { in: statuses as any } },
     include: { school: true, session: true },
     orderBy: { createdAt: "desc" },
   });
@@ -186,10 +186,10 @@ export default async function AthleteRequests({
                         Escrow Secured
                       </p>
                       <p className="text-3xl font-extrabold text-slate-900">
-                        ₹{athlete.pricingSession.toLocaleString()}
+                        ₹{Number(athlete.pricingSession).toLocaleString()}
                       </p>
                       <p className="text-xs text-green-700 font-semibold mt-1">
-                        Your payout: ₹{Math.round(athlete.pricingSession * 0.88).toLocaleString()}
+                        Your payout: ₹{Math.round(Number(athlete.pricingSession) * 0.88).toLocaleString()}
                       </p>
                     </div>
 

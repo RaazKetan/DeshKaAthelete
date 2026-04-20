@@ -99,7 +99,7 @@ export default async function AthleteSessionsPage() {
                     {/* Actions */}
                     <div className="flex flex-col items-end gap-2 shrink-0">
                       <span className="text-xs bg-blue-50 text-blue-700 font-bold px-3 py-1 rounded-full">
-                        ₹{Math.round(athlete.pricingSession * 0.88).toLocaleString()} pending payout
+                        ₹{Math.round(Number(athlete.pricingSession) * 0.88).toLocaleString()} pending payout
                       </span>
                       {isPast && (
                         <form
@@ -161,7 +161,7 @@ export default async function AthleteSessionsPage() {
                   </div>
                   <div className="text-right shrink-0">
                     <p className="font-bold text-green-700 text-sm">
-                      +₹{Math.round(athlete.pricingSession * 0.88).toLocaleString()}
+                      +₹{Math.round(Number(athlete.pricingSession) * 0.88).toLocaleString()}
                     </p>
                     <p className="text-xs text-slate-400">Paid out</p>
                   </div>

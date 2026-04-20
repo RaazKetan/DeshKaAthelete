@@ -17,7 +17,7 @@ export default async function AthleteEarningsPage() {
     prisma.booking.count({ where: { athleteId: athlete.id, status: "CONFIRMED" } }),
   ]);
 
-  const SESSION_FEE = athlete.pricingSession;
+  const SESSION_FEE = Number(athlete.pricingSession);
   const PAYOUT_RATE = 0.88; // 88% after 12% platform fee
 
   const totalEarned = completed.length * SESSION_FEE * PAYOUT_RATE;

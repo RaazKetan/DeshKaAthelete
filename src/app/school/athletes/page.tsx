@@ -52,7 +52,7 @@ export default async function SchoolAthletesDirectory() {
               </div>
 
               <div className="space-y-2 mb-6">
-                {athlete.achievements && athlete.achievements.slice(0, 3).map((ach) => (
+                {athlete.achievements && athlete.achievements.slice(0, 3).map((ach: { id: string; title: string }) => (
                   <div key={ach.id} className="bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-sm text-slate-600 shadow-sm">
                     {ach.title}
                   </div>

@@ -36,8 +36,8 @@ export default async function AthleteDashboard() {
     prisma.booking.count({ where: { athleteId: athlete.id, status: "COMPLETED" } }),
   ]);
 
-  const totalEarnings = totalDelivered * athlete.pricingSession * 0.88;
-  const pendingEscrow = pendingBookings.length * athlete.pricingSession;
+  const totalEarnings = totalDelivered * Number(athlete.pricingSession) * 0.88;
+  const pendingEscrow = pendingBookings.length * Number(athlete.pricingSession);
 
   // Profile completeness
   const completenessItems = [
@@ -211,7 +211,7 @@ export default async function AthleteDashboard() {
                     </div>
                     <div className="text-right shrink-0">
                       <p className="font-extrabold text-slate-900">
-                        ₹{athlete.pricingSession.toLocaleString()}
+                        ₹{Number(athlete.pricingSession).toLocaleString()}
                       </p>
                       <Link
                         href="/athlete/requests"
