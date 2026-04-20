@@ -5,121 +5,137 @@ async function seed() {
 
   const athletes = [
     {
-      id: 'neeraj-chopra',
-      username: 'neeraj_chopra',
-      phone: '9876500001',
-      password: 'athlete123',
       name: 'Neeraj Chopra',
-      sport: 'Athletics',
-      bio: "India's first Olympic gold medalist in a track & field event. A phenomenal journey from Panipat to Paris.",
-      achievements: ['Olympic Gold – Tokyo 2020', 'World Champion – Budapest 2023', 'Asian Games Gold', 'Commonwealth Gold'],
+      sport: 'Athletics – Javelin Throw',
+      bio: "India's first Olympic gold medalist in a track and field event. A phenomenal journey from Panipat to Paris.",
       pricingSession: 75000,
       isVerified: true,
-      aadhaarLastFour: '1234',
-      federationId: 'AFI/HR/001',
+      achievements: [
+        { title: 'Olympic Gold – Tokyo 2020', year: 2021 },
+        { title: 'World Champion – Budapest 2023', year: 2023 },
+        { title: 'Asian Games Gold', year: 2022 },
+        { title: 'Commonwealth Gold', year: 2022 },
+      ],
     },
     {
-      id: 'mirabai-chanu',
-      username: 'mirabai_chanu',
-      phone: '9876500002',
-      password: 'athlete123',
       name: 'Mirabai Chanu',
       sport: 'Weightlifting',
       bio: "India's pride in weightlifting. Silver medalist at Tokyo Olympics and Commonwealth Champion.",
-      achievements: ['Olympic Silver – Tokyo 2020', 'Commonwealth Games Gold 2022', 'World Championship Silver'],
       pricingSession: 50000,
       isVerified: true,
-      aadhaarLastFour: '5678',
-      federationId: 'IWLF/MN/001',
+      achievements: [
+        { title: 'Olympic Silver – Tokyo 2020', year: 2021 },
+        { title: 'Commonwealth Games Gold 2022', year: 2022 },
+        { title: 'World Championship Silver', year: 2021 },
+      ],
     },
     {
-      id: 'pv-sindhu',
-      username: 'pv_sindhu',
-      phone: '9876500003',
-      password: 'athlete123',
       name: 'P.V. Sindhu',
       sport: 'Badminton',
       bio: 'Two-time Olympic medalist and World Champion. One of the most recognizable athletes in India.',
-      achievements: ['Olympic Silver – Rio 2016', 'Olympic Bronze – Tokyo 2020', 'World Champion 2019'],
       pricingSession: 60000,
       isVerified: true,
-      aadhaarLastFour: '9012',
-      federationId: 'BAI/TL/001',
+      achievements: [
+        { title: 'Olympic Silver – Rio 2016', year: 2016 },
+        { title: 'Olympic Bronze – Tokyo 2020', year: 2021 },
+        { title: 'World Champion 2019', year: 2019 },
+      ],
     },
     {
-      id: 'manu-bhaker',
-      username: 'manu_bhaker',
-      phone: '9876500004',
-      password: 'athlete123',
       name: 'Manu Bhaker',
-      sport: 'Shooting',
-      bio: "History-maker at Paris 2024, winning two bronze medals — India's first double-medalist at a single Olympics.",
-      achievements: ['Olympic Bronze – Paris 2024 (×2)', 'Commonwealth Gold 2022', 'World Cup Champion'],
+      sport: 'Shooting – 10m Air Pistol',
+      bio: "History-maker at Paris 2024, winning two bronze medals—India's first double-medalist at a single Olympics.",
       pricingSession: 40000,
       isVerified: true,
-      aadhaarLastFour: '3456',
-      federationId: 'NRAI/HR/001',
+      achievements: [
+        { title: 'Olympic Bronze – Paris 2024 (×2)', year: 2024 },
+        { title: 'Commonwealth Gold 2022', year: 2022 },
+        { title: 'World Cup Champion', year: 2023 },
+      ],
     },
     {
-      id: 'avinash-sable',
-      username: 'avinash_sable',
-      phone: '9876500005',
-      password: 'athlete123',
       name: 'Avinash Sable',
-      sport: 'Athletics',
+      sport: 'Athletics – 3000m Steeplechase',
       bio: 'National record holder and Asian Games gold medalist. Inspired millions through a journey from the Indian Army.',
-      achievements: ['Asian Games Gold 2022', 'Commonwealth Silver 2022', 'National Record Holder'],
       pricingSession: 25000,
       isVerified: true,
-      aadhaarLastFour: '7890',
-      federationId: 'AFI/MH/002',
+      achievements: [
+        { title: 'Asian Games Gold 2022', year: 2022 },
+        { title: 'Commonwealth Silver 2022', year: 2022 },
+        { title: 'National Record Holder', year: 2022 },
+      ],
     },
     {
-      id: 'ravi-dahiya',
-      username: 'ravi_dahiya',
-      phone: '9876500006',
-      password: 'athlete123',
       name: 'Ravi Kumar Dahiya',
-      sport: 'Wrestling',
+      sport: 'Wrestling – Freestyle 57kg',
       bio: 'Chhattarpur boy who became an Olympic silver medalist through sheer grit and discipline.',
-      achievements: ['Olympic Silver – Tokyo 2020', 'World Championship Bronze', 'Asian Championship Gold'],
       pricingSession: 30000,
       isVerified: true,
-      aadhaarLastFour: '2345',
-      federationId: 'WFI/DL/001',
+      achievements: [
+        { title: 'Olympic Silver – Tokyo 2020', year: 2021 },
+        { title: 'World Championship Bronze', year: 2021 },
+        { title: 'Asian Championship Gold', year: 2020 },
+      ],
+    },
+    {
+      name: 'Nikhat Zareen',
+      sport: 'Boxing',
+      bio: 'Two-time World Boxing Champion who broke barriers and inspired a generation of women boxers in India.',
+      pricingSession: 35000,
+      isVerified: true,
+      achievements: [
+        { title: 'World Champion 2022', year: 2022 },
+        { title: 'World Champion 2023', year: 2023 },
+        { title: 'Commonwealth Games Silver 2022', year: 2022 },
+      ],
+    },
+    {
+      name: 'Sreejesh P.R.',
+      sport: 'Hockey (Field) – Goalkeeping',
+      bio: "India's legendary goalkeeper who captained the national team to multiple victories including an Olympic bronze.",
+      pricingSession: 45000,
+      isVerified: true,
+      achievements: [
+        { title: 'Olympic Bronze – Tokyo 2020', year: 2021 },
+        { title: 'Olympic Bronze – Paris 2024', year: 2024 },
+        { title: 'Asian Games Gold 2022', year: 2022 },
+      ],
     },
   ];
 
-  for (const athlete of athletes) {
-    await prisma.athlete.upsert({
-      where: { id: athlete.id },
-      update: {},
-      create: athlete,
+  for (const athleteData of athletes) {
+    const { achievements, ...athleteFields } = athleteData;
+    
+    const athlete = await prisma.athlete.upsert({
+      where: { id: athleteFields.name.toLowerCase().replace(/\s/g, '-').replace(/[^a-z0-9-]/g, '') },
+      update: {
+        ...athleteFields,
+        pricingSession: athleteFields.pricingSession,
+      },
+      create: {
+        id: athleteFields.name.toLowerCase().replace(/\s/g, '-').replace(/[^a-z0-9-]/g, ''),
+        ...athleteFields,
+        pricingSession: athleteFields.pricingSession,
+      },
     });
-    console.log(`  ✅ Seeded: ${athlete.name}  (@${athlete.username}  /  📱 ${athlete.phone}  /  🔑 ${athlete.password})`);
+
+    // Delete old achievements for this athlete and re-create
+    await prisma.achievement.deleteMany({ where: { athleteId: athlete.id } });
+    for (const ach of achievements) {
+      await prisma.achievement.create({
+        data: {
+          athleteId: athlete.id,
+          title: ach.title,
+          year: ach.year,
+          isVerified: true,
+        },
+      });
+    }
+
+    console.log(`  ✅ Seeded: ${athlete.name} (${achievements.length} achievements)`);
   }
 
-  // Seed a demo school
-  const school = await prisma.school.upsert({
-    where: { id: 'demo-school' },
-    update: {},
-    create: {
-      id: 'demo-school',
-      name: 'Delhi Public School, R.K. Puram',
-      city: 'New Delhi',
-      contact: '9811000001',
-    },
-  });
-  console.log(`\n  🏫 Seeded School: ${school.name} (📱 ${school.contact})`);
-
   console.log('\n🎉 Seeding complete!');
-  console.log('\n📋 Test Login Credentials:');
-  console.log('──────────────────────────────────────────');
-  console.log('ATHLETES → /athlete/auth (password: athlete123)');
-  athletes.forEach(a => console.log(`  @${a.username} | ${a.phone}`));
-  console.log('\nSCHOOL → /school/auth');
-  console.log(`  Contact: ${school.contact} | Name: ${school.name}`);
-  console.log('──────────────────────────────────────────\n');
 }
 
 seed()

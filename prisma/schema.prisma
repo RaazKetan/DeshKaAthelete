@@ -1,8 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,65 +11,212 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Athlete {
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  ATHLETE
+  SCHOOL
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  REJECTED
+}
+
+enum SessionType {
+  WORKSHOP
+  TALK
+  TRAINING
+}
+
+enum EscrowStatus {
+  PENDING
+  HELD
+  RELEASED
+  REFUNDED
+}
+
+// ─── User (unified auth) ─────────────────────────────────────────────────────
+
+model User {
   id             String    @id @default(cuid())
+  role           Role
   username       String?   @unique
   phone          String?   @unique
   password       String?
   resetOtp       String?
   resetOtpExpiry DateTime?
-  name           String
-  sport          String
-  bio            String?
-  achievements   String[]
-  pricingSession   Int       @default(10000) // Default 10k INR
-  isVerified       Boolean   @default(false)
-  avatarUrl        String?
-  aadhaarLastFour  String?   // For basic Indian identity proof
-  federationId     String?   // AFI, BAI, HI ID etc
-  kheloIndiaId     String?   
-  verificationDocs String[]  // Array of S3/Cloud URLs to certificates
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  bookings         Booking[]
+
+  athleteId      String?   @unique
+  athlete        Athlete?  @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  schoolId       String?   @unique
+  school         School?   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
 }
+
+// ─── Athlete ─────────────────────────────────────────────────────────────────
+
+model Athlete {
+  id               String        @id @default(cuid())
+  user             User?
+  name             String
+  sport            String
+  bio              String?
+  pricingSession   Decimal       @db.Decimal(10,2) @default(10000.00)
+  currency         String        @default("INR")
+  isVerified       Boolean       @default(false)
+  avatarUrl        String?
+  aadhaarLastFour  String?
+  federationId     String?
+  kheloIndiaId     String?
+  verificationDocs String[]
+
+  achievements     Achievement[]
+  bookings         Booking[]
+  reviews          Review[]
+
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  deletedAt        DateTime?
+
+  @@index([sport, isVerified])
+}
+
+// ─── Achievement ─────────────────────────────────────────────────────────────
+
+model Achievement {
+  id          String   @id @default(cuid())
+  athleteId   String
+  athlete     Athlete  @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  year        Int?
+  isVerified  Boolean  @default(false)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  @@index([athleteId])
+}
+
+// ─── School ──────────────────────────────────────────────────────────────────
 
 model School {
   id        String    @id @default(cuid())
+  user      User?
   name      String
   city      String
   contact   String?
+
+  bookings  Booking[]
+  reviews   Review[]
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  bookings  Booking[]
+  deletedAt DateTime?
 }
+
+// ─── Session (event type) ────────────────────────────────────────────────────
 
 model Session {
-  id          String   @id @default(cuid())
+  id          String      @id @default(cuid())
   title       String
   description String
-  durationMin Int      @default(60)
-  type        String   // e.g. "Workshop", "Talk", "Training"
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  durationMin Int         @default(60)
+  type        SessionType @default(TALK)
+
   bookings    Booking[]
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
 }
 
+// ─── Booking ─────────────────────────────────────────────────────────────────
+
 model Booking {
+  id           String        @id @default(cuid())
+  athleteId    String
+  schoolId     String
+  sessionId    String
+  date         DateTime
+  status       BookingStatus @default(PENDING)
+  audienceSize Int?
+  schoolType   String?
+  schoolNote   String?
+
+  athlete      Athlete            @relation(fields: [athleteId], references: [id])
+  school       School             @relation(fields: [schoolId], references: [id])
+  session      Session            @relation(fields: [sessionId], references: [id])
+  escrow       EscrowTransaction?
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+
+  @@index([athleteId])
+  @@index([schoolId])
+  @@index([sessionId])
+  @@index([date])
+}
+
+// ─── Escrow ──────────────────────────────────────────────────────────────────
+
+model EscrowTransaction {
+  id        String       @id @default(cuid())
+  bookingId String       @unique
+  booking   Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  amount    Decimal      @db.Decimal(10,2)
+  currency  String       @default("INR")
+  status    EscrowStatus @default(PENDING)
+
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  deletedAt DateTime?
+}
+
+// ─── Review ──────────────────────────────────────────────────────────────────
+
+model Review {
   id        String   @id @default(cuid())
   athleteId String
   schoolId  String
-  sessionId String
-  date         DateTime
-  status       String   @default("PENDING") // PENDING, CONFIRMED, COMPLETED
-  audienceSize Int?     // Number of students
-  schoolType   String?  // e.g. CBSE, ICSE, University
-  schoolNote   String?  // Direct message/context from the principal
+  rating    Int      // 1–5
+  comment   String?
 
-  athlete   Athlete  @relation(fields: [athleteId], references: [id])
-  school    School   @relation(fields: [schoolId], references: [id])
-  session   Session  @relation(fields: [sessionId], references: [id])
+  athlete   Athlete  @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([athleteId])
+  @@index([schoolId])
+}
+
+// ─── Notification ────────────────────────────────────────────────────────────
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  message   String
+  type      String   // SMS | EMAIL | IN_APP
+  status    String   @default("PENDING") // PENDING | SENT | FAILED
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([userId])
 }

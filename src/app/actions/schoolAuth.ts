@@ -14,18 +14,33 @@ export async function registerSchool(formData: FormData) {
     throw new Error("All fields are required.");
   }
 
-  const existing = await prisma.school.findFirst({ where: { contact } });
+  // Check if school contact is already registered as a User
+  const existing = await prisma.user.findFirst({
+    where: { phone: contact }
+  });
 
   if (existing) {
     throw new Error("A school is already registered with this contact number.");
   }
 
-  const school = await prisma.school.create({
-    data: { name, city, contact }
+  const user = await prisma.user.create({
+    data: {
+      phone: contact,
+      password,
+      role: "SCHOOL",
+      school: {
+        create: {
+          name,
+          city,
+          contact
+        }
+      }
+    },
+    include: { school: true }
   });
 
   const cookieStore = await cookies();
-  cookieStore.set("auth_school_id", school.id, {
+  cookieStore.set("auth_school_id", user.school!.id, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     maxAge: 60 * 60 * 24 * 30,
@@ -39,21 +54,25 @@ export async function loginSchool(formData: FormData) {
   const contact = formData.get("contact") as string;
   const password = formData.get("password") as string;
 
-  if (!contact) {
-    throw new Error("Contact number is required.");
+  if (!contact || !password) {
+    throw new Error("Contact number and password are required.");
   }
 
-  const school = await prisma.school.findFirst({ where: { contact } });
+  const user = await prisma.user.findFirst({
+    where: { phone: contact, role: "SCHOOL" },
+    include: { school: true }
+  });
 
-  if (!school) {
+  if (!user || !user.school) {
     throw new Error("No school found with this contact number.");
   }
 
-  // NOTE: School model doesn't have a password column yet.
-  // Password validation is a no-op until migration is applied.
+  if (user.password !== password) {
+    throw new Error("Incorrect password.");
+  }
 
   const cookieStore = await cookies();
-  cookieStore.set("auth_school_id", school.id, {
+  cookieStore.set("auth_school_id", user.school.id, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     maxAge: 60 * 60 * 24 * 30,

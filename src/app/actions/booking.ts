@@ -33,16 +33,24 @@ export async function createBooking(formData: FormData, athleteId: string) {
     throw new Error("Invalid school session.");
   }
 
+  // Map incoming string to SessionType enum value (default TALK)
+  const sessionTypeMap: Record<string, "TALK" | "WORKSHOP" | "TRAINING"> = {
+    Talk: "TALK",
+    Workshop: "WORKSHOP",
+    Training: "TRAINING",
+  };
+  const sessionType = sessionTypeMap[type] ?? "TALK";
+
   // Create a session
   const session = await prisma.session.create({
     data: {
       title: `${type} with Athlete`,
       description: schoolNote || "",
-      type,
+      type: sessionType,
     }
   });
 
-  // Create the booking
+  // Create the booking — status defaults to PENDING via schema
   const booking = await prisma.booking.create({
     data: {
       athleteId,
@@ -52,7 +60,6 @@ export async function createBooking(formData: FormData, athleteId: string) {
       audienceSize: audienceSizeStr ? parseInt(audienceSizeStr) : null,
       schoolType,
       schoolNote,
-      status: "PENDING"
     }
   });
 

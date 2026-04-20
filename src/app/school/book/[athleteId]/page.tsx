@@ -8,7 +8,7 @@ export default async function SchoolBookAthlete({
   params: Promise<{ athleteId: string }>;
 }) {
   const resolvedParams = await params;
-  const athlete = await prisma.athlete.findUnique({ where: { id: resolvedParams.athleteId } });
+  const athlete = await prisma.athlete.findUnique({ where: { id: resolvedParams.athleteId }, include: { achievements: true } });
 
   if (!athlete) {
     notFound();

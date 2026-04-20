@@ -33,7 +33,7 @@ export default async function SchoolDashboard() {
   const upcomingSessions = school.bookings.filter(b => b.status === "CONFIRMED" && b.date > new Date());
   const pendingRequests = school.bookings.filter(b => b.status === "PENDING");
 
-  const escrowBalance = pendingRequests.reduce((sum, b) => sum + b.athlete.pricingSession, 0);
+  const escrowBalance = pendingRequests.reduce((sum, b) => sum + Number(b.athlete.pricingSession), 0);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-20 selection:bg-green-500/30">
@@ -123,7 +123,7 @@ export default async function SchoolDashboard() {
                       <p className="text-white/60 text-sm mb-3">{booking.session.title} • {booking.date.toLocaleDateString()}</p>
                       <div className="text-sm border-t border-white/10 pt-3 flex justify-between">
                         <span className="text-white/40">Amount</span>
-                        <span className="font-semibold">₹{(booking.athlete.pricingSession).toLocaleString()} (In Escrow)</span>
+                        <span className="font-semibold">₹{Number(booking.athlete.pricingSession).toLocaleString()} (In Escrow)</span>
                       </div>
                    </div>
                  ))

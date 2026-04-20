@@ -6,6 +6,7 @@ import BackButton from "@/components/BackButton";
 export default async function SchoolAthletesDirectory() {
   const athletes = await prisma.athlete.findMany({
     where: { isVerified: true },
+    include: { achievements: true },
     orderBy: { createdAt: 'desc' }
   });
 
@@ -51,9 +52,9 @@ export default async function SchoolAthletesDirectory() {
               </div>
 
               <div className="space-y-2 mb-6">
-                {athlete.achievements && athlete.achievements.slice(0, 3).map((ach: string, idx: number) => (
-                  <div key={idx} className="bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-sm text-slate-600 shadow-sm">
-                    {ach}
+                {athlete.achievements && athlete.achievements.slice(0, 3).map((ach) => (
+                  <div key={ach.id} className="bg-slate-50 border border-slate-100 rounded-lg px-3 py-2 text-sm text-slate-600 shadow-sm">
+                    {ach.title}
                   </div>
                 ))}
               </div>
@@ -63,7 +64,7 @@ export default async function SchoolAthletesDirectory() {
               <div className="flex items-center justify-between mb-4 pt-4 border-t border-slate-100">
                 <div className="text-sm">
                    <span className="text-slate-500 block">Session Fee</span>
-                   <span className="font-bold text-lg text-slate-900">₹{(athlete.pricingSession / 1000).toFixed(0)}k <span className="text-slate-400 text-sm font-normal">approx</span></span>
+                   <span className="font-bold text-lg text-slate-900">₹{(Number(athlete.pricingSession) / 1000).toFixed(0)}k <span className="text-slate-400 text-sm font-normal">approx</span></span>
                 </div>
                 <div className="text-right">
                    <span className="text-green-600 text-sm font-semibold flex items-center justify-end gap-1">

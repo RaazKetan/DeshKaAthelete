@@ -164,10 +164,10 @@ export default function SchoolBookAthleteClient({
             </div>
 
             <div className="mb-6 space-y-2">
-               {athlete.achievements && athlete.achievements.map((ach: string, i: number) => (
-                 <div key={i} className="flex gap-2 items-start text-sm text-white/70">
+               {athlete.achievements && athlete.achievements.map((ach: any, i: number) => (
+                 <div key={ach.id ?? i} className="flex gap-2 items-start text-sm text-white/70">
                    <Trophy className="w-4 h-4 text-green-400 shrink-0 mt-0.5" />
-                   {ach}
+                   {ach.title ?? ach}
                  </div>
                ))}
             </div>
@@ -175,15 +175,15 @@ export default function SchoolBookAthleteClient({
             <div className="border-t border-white/10 pt-4 space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-white/60">Base Fee (60 mins)</span>
-                <span className="font-medium">₹{(athlete.pricingSession).toLocaleString()}</span>
+                <span className="font-medium">₹{Number(athlete.pricingSession).toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-sm text-white/40 pt-2 border-t border-white/10">
                 <span>GST (18%)</span>
-                <span>₹{(athlete.pricingSession * 0.18).toLocaleString()}</span>
+                <span>₹{(Number(athlete.pricingSession) * 0.18).toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-lg font-bold pt-2 border-t border-white/10">
                 <span>Total to Escrow</span>
-                <span className="text-green-400">₹{(athlete.pricingSession * 1.18).toLocaleString()}</span>
+                <span className="text-green-400">₹{(Number(athlete.pricingSession) * 1.18).toLocaleString()}</span>
               </div>
             </div>
 

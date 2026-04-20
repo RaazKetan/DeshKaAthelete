@@ -36,11 +36,6 @@ export default function AthleteLayout({ children }: { children: React.ReactNode 
 
   if (hideLayout) return <>{children}</>;
 
-  const handleLogout = async () => {
-    const { logoutAthlete } = await import("@/app/actions/athleteAuth");
-    await logoutAthlete();
-  };
-
   const SidebarContent = () => (
     <>
       {/* Logo / Brand */}
@@ -105,7 +100,7 @@ export default function AthleteLayout({ children }: { children: React.ReactNode 
           <Zap className="w-3.5 h-3.5 text-green-400" />
           <p className="text-[11px] text-green-400 font-semibold">Profile is live to 500+ schools</p>
         </div>
-        <button onClick={handleLogout} className="w-full flex items-center gap-2 px-3 py-2 mt-1 text-sm text-slate-500 hover:text-red-400 font-semibold transition-colors rounded-xl hover:bg-red-500/8">
+        <button className="w-full flex items-center gap-2 px-3 py-2 mt-1 text-sm text-slate-500 hover:text-red-400 font-semibold transition-colors rounded-xl hover:bg-red-500/8">
           <LogOut className="w-4 h-4" />
           Log out
         </button>
