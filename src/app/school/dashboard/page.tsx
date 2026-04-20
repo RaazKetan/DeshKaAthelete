@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import BackButton from "@/components/BackButton";
 
+export const dynamic = "force-dynamic";
+
 export default async function SchoolDashboard() {
   const cookieStore = await cookies();
   const schoolId = cookieStore.get("auth_school_id")?.value;

@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { markSessionComplete } from "@/app/actions/booking";
 
+export const dynamic = "force-dynamic";
+
 export default async function AthleteSessionsPage() {
   const athlete = await getMockSession();
   if (!athlete) redirect("/athlete/auth");

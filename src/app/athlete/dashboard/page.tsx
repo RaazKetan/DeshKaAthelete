@@ -13,6 +13,8 @@ import { getMockSession } from "@/app/actions/session";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function AthleteDashboard() {
   const athlete = await getMockSession();
 

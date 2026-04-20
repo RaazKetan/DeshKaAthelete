@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { acceptBooking, declineBooking } from "@/app/actions/booking";
 
+export const dynamic = "force-dynamic";
+
 export default async function AthleteRequests({
   searchParams,
 }: {
