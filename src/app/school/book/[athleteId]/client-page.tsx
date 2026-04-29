@@ -171,7 +171,7 @@ export default function SchoolBookAthleteClient({ athlete }: { athlete: any }) {
               Request a session with {athlete.name}
             </h1>
             <p className="mt-2 text-slate-500">
-              Fill in the details so the athlete has full context before accepting.
+              Fill in the details so the Crest has full context before accepting.
             </p>
 
             <form onSubmit={onSubmit} className="mt-10 space-y-6" noValidate>
@@ -262,7 +262,7 @@ export default function SchoolBookAthleteClient({ athlete }: { athlete: any }) {
                   </div>
 
                   <Field
-                    label="Message to athlete"
+                    label="Message to Crest"
                     error={errors.schoolNote}
                     hint="Brief context about your school and what you'd love from this session."
                   >
@@ -329,7 +329,7 @@ export default function SchoolBookAthleteClient({ athlete }: { athlete: any }) {
               <div className="border-t border-white/10 p-6 flex items-start gap-3 text-[12px] leading-relaxed text-slate-400">
                 <CreditCard className="h-4 w-4 shrink-0 mt-0.5 text-slate-400" />
                 <p>
-                  By proceeding, you accept our cancellation policy. Funds are refunded if the athlete declines or doesn't show up.
+                  By proceeding, you accept our cancellation policy. Funds are refunded if the Crest declines or doesn't show up.
                 </p>
               </div>
             </div>

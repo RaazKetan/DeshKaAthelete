@@ -60,10 +60,10 @@ export default async function SchoolDashboard() {
            {/* Quick Action */}
            <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative overflow-hidden group">
              <div className="absolute right-0 top-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -z-10 group-hover:scale-110 transition-transform duration-700" />
-             <h2 className="text-2xl font-bold mb-2">Plan your next sports event</h2>
-             <p className="text-slate-500 mb-6 max-w-md">Browse our directory of Olympians and Asian Games medalists to inspire your students.</p>
+             <h2 className="text-2xl font-bold mb-2">Plan your next session</h2>
+             <p className="text-slate-500 mb-6 max-w-md">Browse our directory of Olympians and Asian Games medallists — with scientists, civil servants, and defence personnel coming next.</p>
              <Link href="/school/athletes" className="bg-gradient-to-br from-indigo-600 to-indigo-500 text-white shadow-[0_4px_20px_rgba(79,70,229,0.3)] hover:shadow-[0_8px_30px_rgba(79,70,229,0.4)] transition-all flex hover:-translate-y-1 w-max items-center gap-2 px-8 py-3.5 rounded-full font-bold">
-               Browse Athletes <ArrowRight className="w-4 h-4" />
+               Browse Crests <ArrowRight className="w-4 h-4" />
              </Link>
            </div>
 
@@ -112,14 +112,14 @@ export default async function SchoolDashboard() {
              
              <div className="space-y-3">
                {pendingRequests.length === 0 ? (
-                 <p className="text-white/50 text-sm">No pending athlete requests.</p>
+                 <p className="text-white/50 text-sm">No pending requests.</p>
                ) : (
                  pendingRequests.map((booking) => (
                    <div key={booking.id} className="bg-white/5 border border-white/10 rounded-xl p-4">
                       <div className="flex justify-between items-start mb-2">
                         <h4 className="font-semibold text-indigo-400">{booking.athlete.name}</h4>
                         <span className="flex items-center gap-1 text-[10px] bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full uppercase tracking-wider font-bold">
-                          <Clock className="w-3 h-3" /> Awaiting Athlete
+                          <Clock className="w-3 h-3" /> Awaiting Crest
                         </span>
                       </div>
                       <p className="text-white/60 text-sm mb-3">{booking.session.title} • {booking.date.toLocaleDateString()}</p>

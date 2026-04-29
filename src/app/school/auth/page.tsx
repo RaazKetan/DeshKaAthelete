@@ -11,7 +11,7 @@ import { Field, Input, PrefixInput } from "@/components/ui/Field";
 import { registerSchool, loginSchool } from "@/app/actions/schoolAuth";
 
 const HIGHLIGHTS = [
-  { icon: ShieldCheck, text: "Access 200+ KYC-verified athletes" },
+  { icon: ShieldCheck, text: "Access 200+ KYC-verified Crests" },
   { icon: Award, text: "Zero financial risk via escrow" },
   { icon: Building2, text: "Trusted by 500+ schools across India" },
 ];
@@ -70,7 +70,7 @@ export default function SchoolAuthPage() {
         </h2>
         <p className="mt-1.5 text-sm text-slate-500">
           {mode === "signup"
-            ? "Join the network of 500+ schools booking verified athletes."
+            ? "Join the network of 500+ schools booking verified Crests."
             : "Sign in to manage sessions and escrow."}
         </p>
       </div>

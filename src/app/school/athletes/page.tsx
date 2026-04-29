@@ -19,10 +19,10 @@ export default async function SchoolAthletesDirectory() {
       <div className="max-w-7xl mx-auto px-6 pt-12 pb-8">
         <BackButton />
         <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
-          Verified <span className="bg-gradient-to-br from-green-600 to-green-400 bg-clip-text text-transparent">Athlete Directory</span>
+          Verified <span className="bg-gradient-to-br from-green-600 to-green-400 bg-clip-text text-transparent">Crests Directory</span>
         </h1>
         <p className="text-slate-500 text-lg max-w-2xl">
-          Browse our curated list of national champions and Olympians. Find the perfect role model for your student programs and book a session directly.
+          Olympians and national champions today — with scientists, civil servants, and defence personnel coming next. Find the right role model for your students and book a session directly.
         </p>
       </div>
 
