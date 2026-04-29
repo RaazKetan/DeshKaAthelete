@@ -13,6 +13,7 @@ import {
   parseFormData,
   parseObject,
 } from "@/lib/validation";
+import { signupLimit, authLimit, otpLimit, enforce, getClientIp } from "@/lib/rate-limit";
 
 const SALT_ROUNDS = 12;
 
@@ -33,6 +34,8 @@ export async function checkUsername(username: string) {
 
 // ─── Register a new Athlete (creates User + linked Athlete) ──────────────────
 export async function registerAthlete(formData: FormData) {
+  await enforce(signupLimit, await getClientIp());
+
   const parsed = parseFormData(athleteSignupSchema, formData);
   if (!parsed.ok) throw new Error(firstError(parsed.errors));
   const { username, name, phone, password, sport } = parsed.data;
@@ -72,6 +75,8 @@ export async function registerAthlete(formData: FormData) {
 
 // ─── Login an existing Athlete ───────────────────────────────────────────────
 export async function loginAthlete(formData: FormData) {
+  await enforce(authLimit, await getClientIp());
+
   const parsed = parseFormData(athleteLoginSchema, formData);
   if (!parsed.ok) throw new Error(firstError(parsed.errors));
   const { usernameOrPhone, password } = parsed.data;
@@ -110,6 +115,10 @@ export async function sendPasswordResetOtp(phone: string) {
   if (!parsed.ok) throw new Error(firstError(parsed.errors));
   const validPhone = parsed.data.phone;
 
+  // OTPs cost real SMS money — limit by phone, not IP, so attackers can't
+  // burn budget by rotating IPs on a single number.
+  await enforce(otpLimit, validPhone);
+
   const user = await prisma.user.findUnique({
     where: { phone: validPhone },
     select: { id: true, role: true },
@@ -134,6 +143,8 @@ export async function sendPasswordResetOtp(phone: string) {
 
 // ─── Reset password after verifying OTP ──────────────────────────────────────
 export async function resetPasswordWithOtp(formData: FormData) {
+  await enforce(authLimit, await getClientIp());
+
   const parsed = parseFormData(passwordResetCompleteSchema, formData);
   if (!parsed.ok) throw new Error(firstError(parsed.errors));
   const { phone, otp, newPassword } = parsed.data;

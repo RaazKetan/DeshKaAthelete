@@ -10,6 +10,7 @@ import {
   schoolLoginSchema,
   parseFormData,
 } from "@/lib/validation";
+import { signupLimit, authLimit, enforce, getClientIp } from "@/lib/rate-limit";
 
 const SALT_ROUNDS = 12;
 
@@ -19,6 +20,8 @@ function firstError(errors: Record<string, string>): string {
 }
 
 export async function registerSchool(formData: FormData) {
+  await enforce(signupLimit, await getClientIp());
+
   const parsed = parseFormData(schoolSignupSchema, formData);
   if (!parsed.ok) throw new Error(firstError(parsed.errors));
   const { name, city, contact, password } = parsed.data;
@@ -53,6 +56,8 @@ export async function registerSchool(formData: FormData) {
 }
 
 export async function loginSchool(formData: FormData) {
+  await enforce(authLimit, await getClientIp());
+
   const parsed = parseFormData(schoolLoginSchema, formData);
   if (!parsed.ok) throw new Error(firstError(parsed.errors));
   const { contact, password } = parsed.data;

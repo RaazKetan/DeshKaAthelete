@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { razorpay, getPublicKeyId } from "@/lib/razorpay";
 import { bookingSchema, parseFormData } from "@/lib/validation";
+import { bookingLimit, enforce } from "@/lib/rate-limit";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -50,6 +51,11 @@ export async function createBooking(
   athleteId: string,
 ): Promise<RazorpayBookingOrder> {
   const schoolId = await getSchoolId();
+
+  // Limit by schoolId (the authenticated identity) so a single school can't
+  // hammer the booking endpoint with bad data. IP would let one school behind
+  // a NAT block another.
+  await enforce(bookingLimit, schoolId);
 
   const parsed = parseFormData(bookingSchema, formData);
   if (!parsed.ok) throw new Error(firstError(parsed.errors));
