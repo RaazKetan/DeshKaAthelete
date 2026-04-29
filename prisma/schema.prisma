@@ -40,25 +40,39 @@ enum EscrowStatus {
   REFUNDED
 }
 
+enum NotificationType {
+  SMS
+  EMAIL
+  IN_APP
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
 // ─── User (unified auth) ─────────────────────────────────────────────────────
 
 model User {
-  id             String    @id @default(cuid())
+  id             String         @id @default(cuid())
   role           Role
-  username       String?   @unique
-  phone          String?   @unique
-  password       String?
+  username       String?        @unique
+  phone          String?        @unique
+  password       String?        // bcrypt hash
   resetOtp       String?
   resetOtpExpiry DateTime?
 
-  athleteId      String?   @unique
-  athlete        Athlete?  @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  athleteId      String?        @unique
+  athlete        Athlete?       @relation(fields: [athleteId], references: [id], onDelete: Cascade)
 
-  schoolId       String?   @unique
-  school         School?   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  schoolId       String?        @unique
+  school         School?        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
 
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  notifications  Notification[]
+
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
   deletedAt      DateTime?
 }
 
@@ -88,6 +102,7 @@ model Athlete {
   deletedAt        DateTime?
 
   @@index([sport, isVerified])
+  @@index([deletedAt])
 }
 
 // ─── Achievement ─────────────────────────────────────────────────────────────
@@ -123,9 +138,11 @@ model School {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
+
+  @@index([deletedAt])
 }
 
-// ─── Session (event type) ────────────────────────────────────────────────────
+// ─── Session (event type template per booking) ───────────────────────────────
 
 model Session {
   id          String      @id @default(cuid())
@@ -144,44 +161,53 @@ model Session {
 // ─── Booking ─────────────────────────────────────────────────────────────────
 
 model Booking {
-  id           String        @id @default(cuid())
-  athleteId    String
-  schoolId     String
-  sessionId    String
-  date         DateTime
-  status       BookingStatus @default(PENDING)
-  audienceSize Int?
-  schoolType   String?
-  schoolNote   String?
+  id               String        @id @default(cuid())
+  athleteId        String
+  schoolId         String
+  sessionId        String
+  date             DateTime
+  status           BookingStatus @default(PENDING)
+  audienceSize     Int?
+  schoolType       String?
+  schoolNote       String?
+  // Price locked at booking time — prevents history rewrite if athlete changes fee
+  pricingSnapshot  Decimal?      @db.Decimal(10,2)
 
-  athlete      Athlete            @relation(fields: [athleteId], references: [id])
-  school       School             @relation(fields: [schoolId], references: [id])
-  session      Session            @relation(fields: [sessionId], references: [id])
-  escrow       EscrowTransaction?
+  athlete          Athlete            @relation(fields: [athleteId], references: [id])
+  school           School             @relation(fields: [schoolId], references: [id])
+  session          Session            @relation(fields: [sessionId], references: [id])
+  escrow           EscrowTransaction?
+  reviews          Review[]
 
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  deletedAt    DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  deletedAt        DateTime?
 
   @@index([athleteId])
   @@index([schoolId])
   @@index([sessionId])
   @@index([date])
+  @@index([status])
+  @@index([athleteId, status])  // covers the most common query pattern
 }
 
 // ─── Escrow ──────────────────────────────────────────────────────────────────
 
 model EscrowTransaction {
-  id        String       @id @default(cuid())
-  bookingId String       @unique
-  booking   Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  amount    Decimal      @db.Decimal(10,2)
-  currency  String       @default("INR")
-  status    EscrowStatus @default(PENDING)
+  id                    String       @id @default(cuid())
+  bookingId             String       @unique
+  booking               Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  amount                Decimal      @db.Decimal(10,2)
+  currency              String       @default("INR")
+  status                EscrowStatus @default(PENDING)
 
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-  deletedAt DateTime?
+  // Stripe identifiers for audit trail and refunds/transfers
+  stripePaymentIntentId String?
+  stripeTransferId      String?      // set when payout is triggered
+
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+  deletedAt             DateTime?
 }
 
 // ─── Review ──────────────────────────────────────────────────────────────────
@@ -190,11 +216,13 @@ model Review {
   id        String   @id @default(cuid())
   athleteId String
   schoolId  String
+  bookingId String   @unique  // one review per completed booking
   rating    Int      // 1–5
   comment   String?
 
   athlete   Athlete  @relation(fields: [athleteId], references: [id], onDelete: Cascade)
   school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -207,16 +235,18 @@ model Review {
 // ─── Notification ────────────────────────────────────────────────────────────
 
 model Notification {
-  id        String   @id @default(cuid())
-  userId    String
-  title     String
-  message   String
-  type      String   // SMS | EMAIL | IN_APP
-  status    String   @default("PENDING") // PENDING | SENT | FAILED
+  id      String             @id @default(cuid())
+  userId  String
+  user    User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title   String
+  message String
+  type    NotificationType
+  status  NotificationStatus @default(PENDING)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime?
 
+  @@index([userId, status])
   @@index([userId])
 }

@@ -3,55 +3,64 @@
 import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import bcrypt from "bcryptjs";
+
+const SALT_ROUNDS = 12;
 
 export async function registerSchool(formData: FormData) {
-  const name = formData.get("name") as string;
-  const city = formData.get("city") as string;
-  const contact = formData.get("contact") as string;
+  const name     = formData.get("name")     as string;
+  const city     = formData.get("city")     as string;
+  const contact  = formData.get("contact")  as string;
   const password = formData.get("password") as string;
 
   if (!name || !city || !contact || !password) {
     throw new Error("All fields are required.");
   }
 
-  // Check if school contact is already registered as a User
+  if (password.length < 8) {
+    throw new Error("Password must be at least 8 characters.");
+  }
+
   const existing = await prisma.user.findFirst({
-    where: { phone: contact }
+    where: { phone: contact },
   });
 
   if (existing) {
     throw new Error("A school is already registered with this contact number.");
   }
 
+  const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
   const user = await prisma.user.create({
     data: {
       phone: contact,
-      password,
+      password: hashedPassword,
       role: "SCHOOL",
       school: {
         create: {
           name,
           city,
-          contact
-        }
-      }
+          contact,
+        },
+      },
     },
-    include: { school: true }
+    include: { school: true },
   });
 
   const cookieStore = await cookies();
   cookieStore.set("auth_school_id", user.school!.id, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
     maxAge: 60 * 60 * 24 * 30,
-    path: "/"
+    path: "/",
   });
 
   return { success: true };
 }
 
 export async function loginSchool(formData: FormData) {
-  const contact = formData.get("contact") as string;
+  const contact  = formData.get("contact")  as string;
   const password = formData.get("password") as string;
 
   if (!contact || !password) {
@@ -59,15 +68,16 @@ export async function loginSchool(formData: FormData) {
   }
 
   const user = await prisma.user.findFirst({
-    where: { phone: contact, role: "SCHOOL" },
-    include: { school: true }
+    where: { phone: contact, role: "SCHOOL", deletedAt: null },
+    include: { school: true },
   });
 
-  if (!user || !user.school) {
+  if (!user || !user.school || !user.password) {
     throw new Error("No school found with this contact number.");
   }
 
-  if (user.password !== password) {
+  const passwordValid = await bcrypt.compare(password, user.password);
+  if (!passwordValid) {
     throw new Error("Incorrect password.");
   }
 
@@ -75,8 +85,9 @@ export async function loginSchool(formData: FormData) {
   cookieStore.set("auth_school_id", user.school.id, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
     maxAge: 60 * 60 * 24 * 30,
-    path: "/"
+    path: "/",
   });
 
   return { success: true };
