@@ -51,15 +51,15 @@ const TRUST_LOGOS = [
 
 const STATS = [
   { value: "500+", label: "Partner schools", sub: "Across 12 cities" },
-  { value: "200+", label: "Verified athletes", sub: "Olympic to national" },
-  { value: "₹2 Cr+", label: "Paid to athletes", sub: "And growing" },
+  { value: "200+", label: "Verified Crests", sub: "Olympic to national" },
+  { value: "₹2 Cr+", label: "Paid to Crests", sub: "And growing" },
   { value: "98%", label: "Session success", sub: "Rated by schools" },
 ];
 
 const HOW_IT_WORKS = [
   {
     icon: Users,
-    title: "Browse verified athletes",
+    title: "Browse verified Crests",
     body:
       "Filter by sport, city, and availability. Every profile is manually reviewed against Aadhaar, Federation IDs, and Khelo India records.",
   },
@@ -67,13 +67,13 @@ const HOW_IT_WORKS = [
     icon: Lock,
     title: "Pay into escrow",
     body:
-      "Your full session fee is held by DeshKa. The athlete is only notified once payment lands. Zero risk to either side.",
+      "Your full session fee is held by Crests. The Crest is only notified once payment lands. Zero risk to either side.",
   },
   {
     icon: CalendarCheck,
     title: "Session is delivered",
     body:
-      "Athlete shows up. School confirms completion. Funds release to the athlete in 48 hours, minus a flat 12% platform fee.",
+      "The Crest shows up. School confirms completion. Funds release to the Crest in 48 hours, minus a flat 12% platform fee.",
   },
 ];
 
@@ -82,7 +82,7 @@ const TRUST_POINTS = [
     icon: ShieldCheck,
     title: "Manually verified",
     body:
-      "Aadhaar, Federation registration, and Khelo India IDs are reviewed by humans before an athlete is listed.",
+      "Aadhaar, Federation registration, and Khelo India IDs are reviewed by humans before a Crest is listed.",
   },
   {
     icon: Award,
@@ -94,7 +94,7 @@ const TRUST_POINTS = [
     icon: Lock,
     title: "Escrow protection",
     body:
-      "Schools pay the platform, not the athlete. Funds release only after the session is confirmed delivered.",
+      "Schools pay the platform, not the Crest. Funds release only after the session is confirmed delivered.",
   },
   {
     icon: Building2,
@@ -190,7 +190,7 @@ export default function Home() {
           >
             <Link href="/school/athletes">
               <Button size="lg" rightIcon={<ArrowRight className="h-4 w-4" />}>
-                Browse athletes
+                Browse Crests
               </Button>
             </Link>
             <Link href="/athlete/auth">
@@ -386,7 +386,7 @@ export default function Home() {
             <FooterCol
               title="Platform"
               links={[
-                { label: "Browse athletes", href: "/school/athletes" },
+                { label: "Browse Crests", href: "/school/athletes" },
                 { label: "School portal", href: "/school/auth" },
                 { label: "Athlete login", href: "/athlete/auth" },
               ]}

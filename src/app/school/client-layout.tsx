@@ -17,7 +17,7 @@ import { useState } from "react";
 
 const NAV_ITEMS = [
   { href: "/school/dashboard", label: "Dashboard",       icon: LayoutDashboard },
-  { href: "/school/athletes",  label: "Browse Athletes", icon: Users },
+  { href: "/school/athletes",  label: "Browse Crests", icon: Users },
 ];
 
 export default function ClientLayout({ children, school }: { children: React.ReactNode, school: { name: string, city: string } | null }) {
@@ -72,7 +72,7 @@ export default function ClientLayout({ children, school }: { children: React.Rea
           <ShieldCheck className="w-4 h-4 shrink-0" style={{ color: "var(--school-accent)" }} />
           <div>
             <p className="text-[11px] font-black" style={{ color: "var(--school-accent)" }}>Verified Platform</p>
-            <p className="text-[10px] text-slate-400">KYC-checked athletes only</p>
+            <p className="text-[10px] text-slate-400">KYC-checked Crests only</p>
           </div>
         </div>
       </div>
