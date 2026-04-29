@@ -2,8 +2,14 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-
 import { cookies } from "next/headers";
+
+import { onboardingSchema, parseFormData } from "@/lib/validation";
+
+function firstError(errors: Record<string, string>): string {
+  const key = Object.keys(errors)[0];
+  return errors[key] ?? "Validation failed.";
+}
 
 export async function onboardAthlete(formData: FormData) {
   const cookieStore = await cookies();
@@ -13,16 +19,9 @@ export async function onboardAthlete(formData: FormData) {
     throw new Error("Unauthorized. Please sign up or log in first.");
   }
 
-  const name = formData.get("name") as string;
-  const sport = formData.get("sport") as string;
-  const aadhaarLastFour = formData.get("aadhaarLastFour") as string | null;
-  const federationId = formData.get("federationId") as string | null;
-  const kheloIndiaId = formData.get("kheloIndiaId") as string | null;
-  const pricingSession = formData.get("pricingSession") as string | null;
-
-  if (!name || !sport) {
-    throw new Error("Name and Sport are required.");
-  }
+  const parsed = parseFormData(onboardingSchema, formData);
+  if (!parsed.ok) throw new Error(firstError(parsed.errors));
+  const { name, sport, aadhaarLastFour, federationId, kheloIndiaId, pricingSession } = parsed.data;
 
   const athlete = await prisma.athlete.update({
     where: { id: athleteId },
@@ -32,7 +31,7 @@ export async function onboardAthlete(formData: FormData) {
       aadhaarLastFour: aadhaarLastFour || null,
       federationId: federationId || null,
       kheloIndiaId: kheloIndiaId || null,
-      pricingSession: pricingSession ? parseInt(pricingSession) : 15000,
+      pricingSession,
       isVerified: true, // Auto-verified for demo
       verificationDocs: ["https://mock-s3-bucket/kyc.pdf"],
     },

@@ -4,8 +4,14 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { razorpay, getPublicKeyId } from "@/lib/razorpay";
+import { bookingSchema, parseFormData } from "@/lib/validation";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function firstError(errors: Record<string, string>): string {
+  const key = Object.keys(errors)[0];
+  return errors[key] ?? "Validation failed.";
+}
 
 async function getSchoolId(): Promise<string> {
   const cookieStore = await cookies();
@@ -45,19 +51,11 @@ export async function createBooking(
 ): Promise<RazorpayBookingOrder> {
   const schoolId = await getSchoolId();
 
-  const type            = formData.get("type")          as string;
-  const dateStr         = formData.get("date")          as string;
-  const timeStr         = formData.get("time")          as string;
-  const schoolType      = formData.get("schoolType")    as string;
-  const audienceSizeStr = formData.get("audienceSize")  as string;
-  const schoolNote      = formData.get("schoolNote")    as string;
-
-  if (!type || !dateStr || !timeStr) {
-    throw new Error("Missing required fields.");
-  }
+  const parsed = parseFormData(bookingSchema, formData);
+  if (!parsed.ok) throw new Error(firstError(parsed.errors));
+  const { type, date: dateStr, time: timeStr, schoolType, audienceSize, schoolNote } = parsed.data;
 
   const dateTime = new Date(`${dateStr}T${timeStr}`);
-  if (isNaN(dateTime.getTime())) throw new Error("Invalid date/time.");
   if (dateTime < new Date()) throw new Error("Booking date must be in the future.");
 
   const [school, athlete] = await Promise.all([
@@ -100,7 +98,7 @@ export async function createBooking(
         schoolId: school.id,
         sessionId: session.id,
         date: dateTime,
-        audienceSize: audienceSizeStr ? parseInt(audienceSizeStr) : null,
+        audienceSize,
         schoolType,
         schoolNote,
         pricingSnapshot,

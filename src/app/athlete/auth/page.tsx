@@ -98,9 +98,7 @@ export default function AthleteAuthPage() {
   );
 }
 
-function validateName(v: string) { return v.trim().length >= 2 ? "" : "At least 2 characters."; }
-function validatePhone(v: string) { return /^\d{10}$/.test(v.replace(/\s/g, "")) ? "" : "Enter a 10-digit mobile number."; }
-function validatePassword(v: string) { return v.length < 8 ? "Use at least 8 characters." : ""; }
+import { athleteSignupSchema, parseFormData } from "@/lib/validation";
 
 function SignupCard({ onContinue }: { onContinue: () => void }) {
   const [username, setUsername] = useState("");
@@ -124,23 +122,12 @@ function SignupCard({ onContinue }: { onContinue: () => void }) {
     setIsValidating(false);
   }
 
-  function validate(fd: FormData) {
-    const e: Record<string, string> = {};
-    const u = (fd.get("username") as string) ?? "";
-    if (u.length < 3) e.username = "At least 3 characters.";
-    const ne = validateName(fd.get("name") as string); if (ne) e.name = ne;
-    const pe = validatePhone(fd.get("phone") as string); if (pe) e.phone = pe;
-    const pwe = validatePassword(fd.get("password") as string); if (pwe) e.password = pwe;
-    if (!fd.get("sport")) e.sport = "Select your primary sport.";
-    return e;
-  }
-
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (isTaken || isValidating) return;
     const fd = new FormData(e.currentTarget);
-    const errs = validate(fd);
-    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+    const result = parseFormData(athleteSignupSchema, fd);
+    if (!result.ok) { setErrors(result.errors); return; }
     setErrors({});
     setSubmitting(true);
     setServerError("");
