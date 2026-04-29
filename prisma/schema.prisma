@@ -194,20 +194,22 @@ model Booking {
 // ─── Escrow ──────────────────────────────────────────────────────────────────
 
 model EscrowTransaction {
-  id                    String       @id @default(cuid())
-  bookingId             String       @unique
-  booking               Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  amount                Decimal      @db.Decimal(10,2)
-  currency              String       @default("INR")
-  status                EscrowStatus @default(PENDING)
+  id                 String       @id @default(cuid())
+  bookingId          String       @unique
+  booking            Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  amount             Decimal      @db.Decimal(10,2)
+  currency           String       @default("INR")
+  status             EscrowStatus @default(PENDING)
 
-  // Stripe identifiers for audit trail and refunds/transfers
-  stripePaymentIntentId String?
-  stripeTransferId      String?      // set when payout is triggered
+  // Razorpay identifiers for audit trail, refunds, and transfers (Route)
+  razorpayOrderId    String?
+  razorpayPaymentId  String?
+  razorpayRefundId   String?
+  razorpayTransferId String?      // set when payout is triggered (Razorpay Route)
 
-  createdAt             DateTime     @default(now())
-  updatedAt             DateTime     @updatedAt
-  deletedAt             DateTime?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  deletedAt          DateTime?
 }
 
 // ─── Review ──────────────────────────────────────────────────────────────────
