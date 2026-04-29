@@ -127,7 +127,7 @@ export default function Home() {
             <a href="#how" className="hover:text-slate-900 transition-colors">How it works</a>
             <a href="#trust" className="hover:text-slate-900 transition-colors">Trust</a>
             <Link href="/school/athletes" className="hover:text-slate-900 transition-colors">For schools</Link>
-            <Link href="/athlete/auth" className="hover:text-slate-900 transition-colors">For athletes</Link>
+            <Link href="/athlete/auth" className="hover:text-slate-900 transition-colors">For Crests</Link>
           </nav>
           <div className="flex items-center gap-2">
             <Link href="/athlete/auth" className="hidden sm:inline-flex">
@@ -195,7 +195,7 @@ export default function Home() {
             </Link>
             <Link href="/athlete/auth">
               <Button size="lg" variant="outline">
-                Join as an athlete
+                Become a Crest
               </Button>
             </Link>
           </motion.div>
@@ -388,7 +388,7 @@ export default function Home() {
               links={[
                 { label: "Browse Crests", href: "/school/athletes" },
                 { label: "School portal", href: "/school/auth" },
-                { label: "Athlete login", href: "/athlete/auth" },
+                { label: "Crest login", href: "/athlete/auth" },
               ]}
             />
             <FooterCol
