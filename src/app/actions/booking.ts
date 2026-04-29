@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
-import { stripe } from "@/lib/stripe";
+import { razorpay, getPublicKeyId } from "@/lib/razorpay";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -21,20 +21,36 @@ async function getAthleteId(): Promise<string> {
   return id;
 }
 
+export interface RazorpayBookingOrder {
+  bookingId: string;
+  orderId: string;
+  amount: number;       // paise
+  currency: string;
+  keyId: string;
+  name: string;
+  description: string;
+  prefill: {
+    name?: string;
+    contact?: string;
+  };
+}
+
 // ─── createBooking ────────────────────────────────────────────────────────────
-// Creates a booking (PENDING) and returns a Stripe Checkout URL for payment.
+// Creates a PENDING booking and a Razorpay Order. The client opens Razorpay
+// Checkout with these details; on success, /api/razorpay/verify confirms the
+// payment and the webhook persists the EscrowTransaction.
 export async function createBooking(
   formData: FormData,
-  athleteId: string
-): Promise<{ checkoutUrl: string }> {
+  athleteId: string,
+): Promise<RazorpayBookingOrder> {
   const schoolId = await getSchoolId();
 
-  const type           = formData.get("type")          as string;
-  const dateStr        = formData.get("date")          as string;
-  const timeStr        = formData.get("time")          as string;
-  const schoolType     = formData.get("schoolType")    as string;
-  const audienceSizeStr = formData.get("audienceSize") as string;
-  const schoolNote     = formData.get("schoolNote")    as string;
+  const type            = formData.get("type")          as string;
+  const dateStr         = formData.get("date")          as string;
+  const timeStr         = formData.get("time")          as string;
+  const schoolType      = formData.get("schoolType")    as string;
+  const audienceSizeStr = formData.get("audienceSize")  as string;
+  const schoolNote      = formData.get("schoolNote")    as string;
 
   if (!type || !dateStr || !timeStr) {
     throw new Error("Missing required fields.");
@@ -45,12 +61,18 @@ export async function createBooking(
   if (dateTime < new Date()) throw new Error("Booking date must be in the future.");
 
   const [school, athlete] = await Promise.all([
-    prisma.school.findUnique({ where: { id: schoolId, deletedAt: null }, select: { id: true, name: true } }),
-    prisma.athlete.findUnique({ where: { id: athleteId, deletedAt: null }, select: { id: true, name: true, pricingSession: true, isVerified: true } }),
+    prisma.school.findUnique({
+      where: { id: schoolId, deletedAt: null },
+      select: { id: true, name: true, contact: true },
+    }),
+    prisma.athlete.findUnique({
+      where: { id: athleteId, deletedAt: null },
+      select: { id: true, name: true, pricingSession: true, isVerified: true },
+    }),
   ]);
 
   if (!school) throw new Error("Invalid school session.");
-  if (!athlete || !athlete.isVerified) throw new Error("Athlete not found or not verified.");
+  if (!athlete || !athlete.isVerified) throw new Error("Crest not found or not verified.");
 
   const sessionTypeMap: Record<string, "TALK" | "WORKSHOP" | "TRAINING"> = {
     Talk: "TALK",
@@ -59,9 +81,10 @@ export async function createBooking(
   };
   const sessionType = sessionTypeMap[type] ?? "TALK";
 
-  const pricingSnapshot = athlete.pricingSession; // lock price at booking time
+  const pricingSnapshot = athlete.pricingSession;
 
-  // Create Session and Booking in a transaction
+  // Create Session + Booking in a single transaction. Status is PENDING until
+  // payment is captured by the webhook (or /verify endpoint).
   const booking = await prisma.$transaction(async (tx) => {
     const session = await tx.session.create({
       data: {
@@ -90,37 +113,30 @@ export async function createBooking(
   const gst = Math.round(baseAmount * 0.18);
   const totalAmount = baseAmount + gst;
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
-
-  const checkoutSession = await stripe.checkout.sessions.create({
-    mode: "payment",
-    line_items: [
-      {
-        price_data: {
-          currency: "inr",
-          product_data: {
-            name: `${type} with ${athlete.name}`,
-            description: `${school.name} · ${dateTime.toLocaleDateString("en-IN")}`,
-          },
-          unit_amount: totalAmount,
-        },
-        quantity: 1,
-      },
-    ],
-    payment_intent_data: {
-      metadata: { bookingId: booking.id },
-    },
-    metadata: { bookingId: booking.id },
-    success_url: `${baseUrl}/school/dashboard?booking=success`,
-    cancel_url:  `${baseUrl}/school/book/${athleteId}?booking=cancelled`,
+  // Razorpay Order with bookingId in notes for webhook + verify lookup.
+  const order = await razorpay.orders.create({
+    amount: totalAmount,
+    currency: "INR",
+    receipt: booking.id,
+    notes: { bookingId: booking.id, schoolId: school.id, athleteId },
   });
-
-  if (!checkoutSession.url) throw new Error("Failed to create Stripe Checkout session.");
 
   revalidatePath("/athlete/requests");
   revalidatePath("/school/dashboard");
 
-  return { checkoutUrl: checkoutSession.url };
+  return {
+    bookingId: booking.id,
+    orderId: order.id,
+    amount: totalAmount,
+    currency: "INR",
+    keyId: getPublicKeyId(),
+    name: "Crests by DeshKa",
+    description: `${type} with ${athlete.name} · ${school.name}`,
+    prefill: {
+      name: school.name,
+      contact: school.contact ?? undefined,
+    },
+  };
 }
 
 // ─── acceptBooking ────────────────────────────────────────────────────────────
@@ -164,14 +180,18 @@ export async function declineBooking(bookingId: string) {
     data: { status: "CANCELLED" },
   });
 
-  // If payment was captured, trigger a refund via Stripe
-  if (booking.escrow?.stripePaymentIntentId) {
-    await stripe.refunds.create({
-      payment_intent: booking.escrow.stripePaymentIntentId,
+  // If the school already paid, refund the captured payment via Razorpay.
+  if (booking.escrow?.razorpayPaymentId) {
+    const refund = await razorpay.payments.refund(booking.escrow.razorpayPaymentId, {
+      // Full refund — pass speed: "normal" or "optimum" if needed.
+      speed: "normal",
     });
     await prisma.escrowTransaction.update({
       where: { bookingId },
-      data: { status: "REFUNDED" },
+      data: {
+        status: "REFUNDED",
+        razorpayRefundId: refund.id,
+      },
     });
   }
 
@@ -197,15 +217,13 @@ export async function markSessionComplete(bookingId: string) {
     data: { status: "COMPLETED" },
   });
 
-  // TODO: Trigger payout to athlete's Stripe Connect account here.
-  // await stripe.transfers.create({ ... })
+  // TODO: Trigger payout to Crest via Razorpay Route (transfers).
+  // await razorpay.transfers.create({ ... })
 
-  if (booking) {
-    await prisma.escrowTransaction.updateMany({
-      where: { bookingId, status: "HELD" },
-      data: { status: "RELEASED" },
-    });
-  }
+  await prisma.escrowTransaction.updateMany({
+    where: { bookingId, status: "HELD" },
+    data: { status: "RELEASED" },
+  });
 
   revalidatePath("/athlete/sessions");
   revalidatePath("/athlete/earnings");

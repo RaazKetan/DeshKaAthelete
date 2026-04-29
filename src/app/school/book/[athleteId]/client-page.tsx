@@ -21,6 +21,36 @@ import { Field, Input, Select, Textarea } from "@/components/ui/Field";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Container } from "@/components/ui/Container";
 
+// Razorpay Checkout is loaded as a global script tag.
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, any>) => { open: () => void };
+  }
+}
+
+const RAZORPAY_SCRIPT_SRC = "https://checkout.razorpay.com/v1/checkout.js";
+
+function loadRazorpayScript(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined") return resolve(false);
+    if (window.Razorpay) return resolve(true);
+
+    const existing = document.querySelector(`script[src="${RAZORPAY_SCRIPT_SRC}"]`);
+    if (existing) {
+      existing.addEventListener("load", () => resolve(true), { once: true });
+      existing.addEventListener("error", () => resolve(false), { once: true });
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = RAZORPAY_SCRIPT_SRC;
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
 function validate(fd: FormData) {
   const errors: Record<string, string> = {};
 
@@ -64,9 +94,47 @@ export default function SchoolBookAthleteClient({ athlete }: { athlete: any }) {
     }
     setErrors({});
     setSubmitting(true);
+
     try {
-      const { checkoutUrl } = await createBooking(fd, athlete.id);
-      window.location.href = checkoutUrl;
+      const order = await createBooking(fd, athlete.id);
+
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded || !window.Razorpay) {
+        throw new Error("Couldn't load the Razorpay payment widget. Check your connection and try again.");
+      }
+
+      const rzp = new window.Razorpay({
+        key: order.keyId,
+        amount: order.amount,
+        currency: order.currency,
+        order_id: order.orderId,
+        name: order.name,
+        description: order.description,
+        prefill: order.prefill,
+        theme: { color: "#059669" },
+        handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
+          try {
+            const res = await fetch("/api/razorpay/verify", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ ...response, bookingId: order.bookingId }),
+            });
+            if (!res.ok) {
+              const data = await res.json().catch(() => ({}));
+              throw new Error(data.error || "Payment verification failed.");
+            }
+            router.push("/school/dashboard?booking=success");
+          } catch (err: any) {
+            setAlertInfo({ type: "error", message: err.message || "Payment verification failed." });
+            setSubmitting(false);
+          }
+        },
+        modal: {
+          ondismiss: () => setSubmitting(false),
+        },
+      });
+
+      rzp.open();
     } catch (err: any) {
       console.error(err);
       setAlertInfo({ type: "error", message: err.message || "Failed to submit request." });
@@ -211,7 +279,7 @@ export default function SchoolBookAthleteClient({ athlete }: { athlete: any }) {
               </Card>
 
               <Button type="submit" size="lg" fullWidth disabled={submitting}>
-                {submitting ? "Redirecting to payment…" : `Pay ₹${total.toLocaleString("en-IN")} & request session`}
+                {submitting ? "Opening Razorpay…" : `Pay ₹${total.toLocaleString("en-IN")} & request session`}
               </Button>
               <p className="flex items-center justify-center gap-1.5 text-xs text-slate-500">
                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
