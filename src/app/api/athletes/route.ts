@@ -1,21 +1,26 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
 
-// This is part of your Node.js Backend!
-// It runs securely on the server and connects to the database.
-
-// GET /api/athletes - Fetch all athletes for the marketplace
+// GET /api/athletes — public marketplace listing (verified athletes only)
 export async function GET() {
   try {
     const athletes = await prisma.athlete.findMany({
-      where: {
-        isVerified: true, // Only show verified athletes to schools
+      where: { isVerified: true, deletedAt: null },
+      select: {
+        id: true,
+        name: true,
+        sport: true,
+        bio: true,
+        pricingSession: true,
+        currency: true,
+        avatarUrl: true,
+        achievements: { select: { id: true, title: true, year: true }, take: 3 },
       },
-      orderBy: {
-        createdAt: 'desc',
-      }
+      orderBy: { createdAt: "desc" },
+      take: 50, // pagination guard
     });
-    
+
     return NextResponse.json(athletes);
   } catch (error) {
     console.error("Failed to fetch athletes:", error);
@@ -23,11 +28,23 @@ export async function GET() {
   }
 }
 
-// POST /api/athletes - Onboard a new athlete (Admin or Athlete themselves)
-export async function POST(request: Request) {
+// POST /api/athletes — admin-only athlete creation
+// Requires the request to carry a valid admin API key in the Authorization header.
+export async function POST(request: NextRequest) {
+  const authHeader = request.headers.get("Authorization");
+  const adminKey   = process.env.ADMIN_API_KEY;
+
+  if (!adminKey || authHeader !== `Bearer ${adminKey}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     const { name, sport, bio, pricingSession } = body;
+
+    if (!name || !sport) {
+      return NextResponse.json({ error: "name and sport are required" }, { status: 400 });
+    }
 
     const newAthlete = await prisma.athlete.create({
       data: {
@@ -35,8 +52,8 @@ export async function POST(request: Request) {
         sport,
         bio,
         pricingSession: pricingSession ?? 10000,
-        isVerified: false, // Must be verified by admin later
-      }
+        isVerified: false,
+      },
     });
 
     return NextResponse.json(newAthlete, { status: 201 });

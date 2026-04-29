@@ -1,13 +1,19 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
 
-// Mock Auth Session: We will just return the most recently created athlete
-// so we don't have to build a full authentication system right now.
-export async function getMockSession() {
-  const athlete = await prisma.athlete.findFirst({
-    orderBy: { createdAt: "desc" },
+// Returns the currently authenticated athlete from the session cookie.
+// Returns null if the cookie is missing or the athlete no longer exists.
+export async function getAthleteSession() {
+  const cookieStore = await cookies();
+  const athleteId = cookieStore.get("auth_athlete_id")?.value;
+  if (!athleteId) return null;
+
+  return prisma.athlete.findUnique({
+    where: { id: athleteId, deletedAt: null },
   });
-  
-  return athlete; // Returns null if no athletes exist in DB yet
 }
+
+// Keep the old export name so existing imports don't break.
+export { getAthleteSession as getMockSession };
