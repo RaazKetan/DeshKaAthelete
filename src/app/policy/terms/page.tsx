@@ -17,7 +17,7 @@ export default function TermsOfService() {
           </p>
           <h2 className="text-2xl font-bold text-slate-900 mt-8 mb-4">1. Acceptance of Terms</h2>
           <p>
-            By accessing or using the DeshKa Athlete platform, you agree to be bound by these restrictions and rules, effectively acting as an agreement between you and the platform.
+            By accessing or using the Crests (by DeshKa) platform, you agree to be bound by these restrictions and rules, effectively acting as an agreement between you and the platform.
           </p>
           <h2 className="text-2xl font-bold text-slate-900 mt-8 mb-4">2. Escrow Services</h2>
           <p>

@@ -13,19 +13,25 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DeshKa Athlete | India's Elite Sports Mentorship Platform",
-  description: "Connect your students with verified Olympians, National Champions, and Asian Games medalists from India. Book coaching workshops, career guidance talks, and training sessions.",
-  keywords: "Indian athletes, olympian coaching, sports mentorship, school workshops, Neeraj Chopra, PV Sindhu",
+  title: "Crests — India's verified national achievers, one booking away",
+  description:
+    "Book Olympians, national champions, and verified national achievers for school and institutional sessions. Aadhaar + Federation verified. Escrow-protected payments.",
+  keywords: [
+    "Indian athletes",
+    "Olympian coaching",
+    "school workshops",
+    "national achievers",
+    "Khelo India",
+    "verified mentors",
+  ],
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className="min-h-screen bg-white text-slate-900">{children}</body>
     </html>
   );
 }
