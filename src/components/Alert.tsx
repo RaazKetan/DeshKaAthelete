@@ -1,5 +1,8 @@
+"use client";
+
 import { AlertCircle, CheckCircle2, Info, X } from "lucide-react";
-import React, { useState } from "react";
+import { useState } from "react";
+import { cn } from "@/lib/cn";
 
 type AlertType = "error" | "success" | "info";
 
@@ -8,58 +11,38 @@ interface AlertProps {
   message: string;
   onClose?: () => void;
   className?: string;
+  dismissible?: boolean;
 }
 
-export default function Alert({ type, message, onClose, className = "" }: AlertProps) {
-  const [isVisible, setIsVisible] = useState(true);
+const config = {
+  error:   { Icon: AlertCircle,   classes: "bg-rose-50 border-rose-200 text-rose-700" },
+  success: { Icon: CheckCircle2,  classes: "bg-emerald-50 border-emerald-200 text-emerald-700" },
+  info:    { Icon: Info,          classes: "bg-slate-50 border-slate-200 text-slate-700" },
+} as const;
 
-  if (!isVisible) return null;
+export default function Alert({ type, message, onClose, className, dismissible = true }: AlertProps) {
+  const [open, setOpen] = useState(true);
+  if (!open) return null;
 
-  const handleClose = () => {
-    setIsVisible(false);
-    if (onClose) onClose();
-  };
+  const { Icon, classes } = config[type];
 
-  const config = {
-    error: {
-      bg: "bg-red-50",
-      border: "border-red-200",
-      iconColor: "text-red-500",
-      textColor: "text-red-700",
-      Icon: AlertCircle
-    },
-    success: {
-      bg: "bg-green-50",
-      border: "border-green-200",
-      iconColor: "text-green-500",
-      textColor: "text-green-700",
-      Icon: CheckCircle2
-    },
-    info: {
-      bg: "bg-blue-50",
-      border: "border-blue-200",
-      iconColor: "text-blue-500",
-      textColor: "text-blue-700",
-      Icon: Info
-    }
-  };
-
-  const style = config[type];
-  const Icon = style.Icon;
+  function handleClose() {
+    setOpen(false);
+    onClose?.();
+  }
 
   return (
-    <div className={`flex items-start gap-3 p-4 rounded-xl border ${style.bg} ${style.border} ${className}`}>
-      <Icon className={`w-5 h-5 shrink-0 mt-0.5 ${style.iconColor}`} />
-      <div className={`flex-1 text-sm font-medium ${style.textColor}`}>
-        {message}
-      </div>
-      {(onClose || true) && (
-        <button 
-          onClick={handleClose}
-          className={`shrink-0 opacity-50 hover:opacity-100 transition-opacity ${style.textColor}`}
+    <div className={cn("flex items-start gap-3 rounded-lg border px-4 py-3 text-sm", classes, className)}>
+      <Icon className="h-4 w-4 shrink-0 mt-0.5" />
+      <p className="flex-1 font-medium leading-relaxed">{message}</p>
+      {dismissible && (
+        <button
           type="button"
+          onClick={handleClose}
+          aria-label="Dismiss"
+          className="shrink-0 opacity-60 hover:opacity-100 transition-opacity"
         >
-          <X className="w-4 h-4" />
+          <X className="h-3.5 w-3.5" />
         </button>
       )}
     </div>

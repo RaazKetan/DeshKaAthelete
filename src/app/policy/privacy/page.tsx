@@ -13,7 +13,7 @@ export default function PrivacyPolicy() {
         
         <div className="space-y-6 text-slate-600 leading-relaxed">
           <p>
-            DeshKa Athlete ("we," "us," or "our") respects your privacy and is committed to protecting it through our compliance with this policy.
+            Crests (by DeshKa) ("we," "us," or "our") respects your privacy and is committed to protecting it through our compliance with this policy.
           </p>
           <h2 className="text-2xl font-bold text-slate-900 mt-8 mb-4">1. Information We Collect</h2>
           <p>

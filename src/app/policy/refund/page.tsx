@@ -21,7 +21,7 @@ export default function RefundPolicy() {
           </p>
           <h2 className="text-2xl font-bold text-slate-900 mt-8 mb-4">2. Rescheduling</h2>
           <p>
-            No cancellation fees apply if the session is uniformly rescheduled by both the school and the athlete through the DeshKa platform directly.
+            No cancellation fees apply if the session is uniformly rescheduled by both the school and the athlete through the Crests platform directly.
           </p>
           <h2 className="text-2xl font-bold text-slate-900 mt-8 mb-4">3. Dispute Resolution</h2>
           <p>

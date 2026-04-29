@@ -114,7 +114,7 @@ export default async function AthleteDashboard() {
               <span className="font-bold text-slate-500">Sessions Done</span>
             </div>
             <h2 className="text-3xl font-extrabold">{totalDelivered}</h2>
-            <p className="text-sm text-slate-500 mt-2 font-medium">Verified by DeshKa Athlete</p>
+            <p className="text-sm text-slate-500 mt-2 font-medium">Verified by Crests</p>
           </div>
 
           {/* Pending requests */}

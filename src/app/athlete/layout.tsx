@@ -41,12 +41,15 @@ export default function AthleteLayout({ children }: { children: React.ReactNode 
       {/* Logo / Brand */}
       <div className="px-5 py-6 border-b border-white/5">
         <Link href="/" className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-green-600 to-green-400 flex items-center justify-center font-black text-white text-sm shadow-lg shadow-green-500/30">
-            DA
+          <div className="w-9 h-9 rounded-md bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 3l8 3v6c0 4.5-3.4 8.5-8 9.5C7.4 20.5 4 16.5 4 12V6l8-3z" />
+              <path d="M9 11l2.4 2.4L15 9.5" />
+            </svg>
           </div>
           <div>
-            <p className="font-black text-white text-sm leading-none tracking-tight">DeshKa Athlete</p>
-            <p className="text-[10px] text-green-500 font-bold uppercase tracking-widest mt-0.5">Player HQ</p>
+            <p className="font-semibold text-white text-sm leading-none tracking-tight">Crests</p>
+            <p className="text-[10px] text-emerald-400 font-medium uppercase tracking-widest mt-1">Athlete HQ</p>
           </div>
         </Link>
       </div>

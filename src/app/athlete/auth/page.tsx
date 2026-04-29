@@ -1,364 +1,308 @@
 "use client";
 
-import { ArrowRight, Medal, ShieldCheck, Star, Trophy, Zap } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Award, Lock, ShieldCheck, Wallet } from "lucide-react";
 
-import BackButton from "@/components/BackButton";
+import AuthLayout from "@/components/AuthLayout";
 import Alert from "@/components/Alert";
+import { Button } from "@/components/ui/Button";
+import { Field, Input, PrefixInput, Select } from "@/components/ui/Field";
 
 const HIGHLIGHTS = [
-  { icon: Zap, text: "₹2 Cr+ paid to players" },
-  { icon: ShieldCheck, text: "Escrow-guaranteed payments" },
-  { icon: Star, text: "500+ partner schools" },
-  { icon: Trophy, text: "15+ sports covered" },
+  { icon: Wallet, text: "₹2 Cr+ paid to athletes already" },
+  { icon: ShieldCheck, text: "Escrow-guaranteed before you arrive" },
+  { icon: Award, text: "500+ partner schools, 12 cities" },
 ];
 
-export default function AthleteAuth() {
-  const [mode, setMode] = useState<"login" | "signup" | "forgot_password">("signup");
+export default function AthleteAuthPage() {
+  const [mode, setMode] = useState<"login" | "signup" | "forgot">("signup");
   const router = useRouter();
 
-  return (
-    <div className="min-h-screen bg-slate-50 flex">
-      {/* Left Brand Panel */}
-      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative flex-col justify-between p-12 overflow-hidden">
-        {/* Glows */}
-        <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-green-500/15 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-blue-500/10 rounded-full blur-[100px]" />
+  const side = (
+    <div className="space-y-10 max-w-md">
+      <div>
+        <p className="text-xs font-medium uppercase tracking-[0.18em] text-emerald-400">Athlete · Crests by DeshKa</p>
+        <h1 className="mt-4 text-4xl font-semibold tracking-[-0.025em] leading-[1.1]">
+          You earned the crest.
+          <br />
+          <span className="text-emerald-400">Now let it earn for you.</span>
+        </h1>
+        <p className="mt-5 text-slate-300 leading-relaxed">
+          Join India's verified marketplace for national achievers. Set your fee, pick your dates, get paid 48 hours after every session.
+        </p>
+      </div>
 
-        {/* Logo */}
-        <Link href="/" className="relative z-10 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-green-600 to-green-400 flex items-center justify-center font-bold text-lg text-white">
-            DA
-          </div>
-          <span className="font-bold text-xl text-white tracking-tight">DeshKa Athlete</span>
-        </Link>
+      <ul className="space-y-3">
+        {HIGHLIGHTS.map(({ icon: Icon, text }) => (
+          <li key={text} className="flex items-center gap-3 text-sm text-slate-300">
+            <span className="flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-white/5">
+              <Icon className="h-3.5 w-3.5 text-emerald-400" />
+            </span>
+            {text}
+          </li>
+        ))}
+      </ul>
 
-        {/* Center content */}
-        <div className="relative z-10 space-y-8">
+      <figure className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
+        <blockquote className="text-sm text-slate-300 leading-relaxed">
+          “In three months I delivered 8 school sessions. Escrow meant I never chased a single payment.”
+        </blockquote>
+        <figcaption className="mt-4 flex items-center gap-3">
+          <span className="h-8 w-8 rounded-full bg-emerald-500/20 grid place-items-center text-xs font-semibold text-emerald-300">RK</span>
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/15 border border-green-500/25 mb-6">
-              <Medal className="w-4 h-4 text-green-400" />
-              <span className="text-xs font-bold text-green-400 uppercase tracking-wide">Player Portal</span>
-            </div>
-            <h1 className="text-4xl font-extrabold text-white leading-tight mb-4">
-              Your game built your reputation.
-              <br />
-              <span className="bg-gradient-to-br from-green-600 to-green-400 bg-clip-text text-transparent">Let it earn too.</span>
-            </h1>
-            <p className="text-slate-400 text-lg leading-relaxed">
-              Join India&apos;s first verified marketplace connecting elite sports players — 
-              cricketers, footballers, kabaddi stars, and more — with schools for sessions and mentorship.
-            </p>
+            <p className="text-sm font-medium text-white">Rohan Kumar</p>
+            <p className="text-[11px] text-slate-500">National Kabaddi · Pune</p>
           </div>
+        </figcaption>
+      </figure>
+    </div>
+  );
 
-          <div className="space-y-3">
-            {HIGHLIGHTS.map(({ icon: Icon, text }) => (
-              <div key={text} className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center shrink-0">
-                  <Icon className="w-4 h-4 text-green-400" />
-                </div>
-                <p className="text-slate-300 font-semibold text-sm">{text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Bottom testimonial */}
-        <div className="relative z-10 bg-slate-800/60 border border-slate-700/50 rounded-2xl p-5 backdrop-blur-sm">
-          <p className="text-slate-300 text-sm italic leading-relaxed mb-3">
-            &ldquo;In just 3 months, I&apos;ve done 8 school sessions. The escrow system means I never chase payments.&rdquo;
-          </p>
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white text-xs font-bold">
-              RK
-            </div>
-            <div>
-              <p className="text-white text-sm font-bold">Rohan Kumar</p>
-              <p className="text-slate-500 text-xs">National-level Kabaddi player · Pune</p>
-            </div>
-          </div>
-        </div>
+  return (
+    <AuthLayout side={side} tone="dark">
+      <div className="mb-8">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
+          {mode === "signup" && "Create your athlete account"}
+          {mode === "login" && "Welcome back"}
+          {mode === "forgot" && "Reset your password"}
+        </h2>
+        <p className="mt-1.5 text-sm text-slate-500">
+          {mode === "signup" && "Manual KYC. Only verified athletes are listed."}
+          {mode === "login" && "Sign in to manage bookings and payouts."}
+          {mode === "forgot" && "We'll send a 6-digit OTP to your registered mobile."}
+        </p>
       </div>
 
-      {/* Right Auth Panel */}
-      <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-6 md:p-12">
-        <div className="w-full max-w-md">
-          <BackButton />
-          {/* Mobile logo */}
-          <Link href="/" className="lg:hidden flex items-center gap-2 mb-10 mt-6">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-green-600 to-green-400 flex items-center justify-center font-bold text-white">
-            DA
-          </div>
-          <span className="font-bold text-lg text-slate-900">DeshKa Athlete</span>
-        </Link>
-
-        <div className="w-full max-w-md">
-          {/* Toggle */}
-          <div className="flex bg-slate-100 rounded-xl p-1 mb-8">
-            <button
-              id="auth-signup-tab"
-              onClick={() => setMode("signup")}
-              className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${
-                mode === "signup"
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-500 hover:text-slate-700"
-              }`}
-            >
-              Create Account
-            </button>
-            <button
-              id="auth-login-tab"
-              onClick={() => setMode("login")}
-              className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all ${
-                mode === "login"
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-500 hover:text-slate-700"
-              }`}
-            >
-              Log In
-            </button>
-          </div>
-
-          {mode === "signup" ? (
-            <SignupCard onContinue={() => router.push("/athlete/onboarding")} />
-          ) : mode === "login" ? (
-            <LoginCard onLogin={() => router.push("/athlete/dashboard")} onForgotPassword={() => setMode("forgot_password")} />
-          ) : (
-            <ForgotPasswordCard onBack={() => setMode("login")} />
-          )}
+      {mode !== "forgot" && (
+        <div className="grid grid-cols-2 rounded-lg bg-slate-100 p-1 mb-6 text-sm font-medium">
+          <button
+            onClick={() => setMode("signup")}
+            className={`h-9 rounded-md transition-colors ${mode === "signup" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800"}`}
+          >
+            Sign up
+          </button>
+          <button
+            onClick={() => setMode("login")}
+            className={`h-9 rounded-md transition-colors ${mode === "login" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800"}`}
+          >
+            Log in
+          </button>
         </div>
-      </div>
-    </div>
-    </div>
+      )}
+
+      {mode === "signup" && <SignupCard onContinue={() => router.push("/athlete/onboarding")} />}
+      {mode === "login" && <LoginCard onLogin={() => router.push("/athlete/dashboard")} onForgot={() => setMode("forgot")} />}
+      {mode === "forgot" && <ForgotPasswordCard onBack={() => setMode("login")} />}
+    </AuthLayout>
   );
 }
 
+function validateName(v: string) { return v.trim().length >= 2 ? "" : "At least 2 characters."; }
+function validatePhone(v: string) { return /^\d{10}$/.test(v.replace(/\s/g, "")) ? "" : "Enter a 10-digit mobile number."; }
+function validatePassword(v: string) { return v.length < 8 ? "Use at least 8 characters." : ""; }
+
 function SignupCard({ onContinue }: { onContinue: () => void }) {
   const [username, setUsername] = useState("");
+  const [phone, setPhone] = useState("");
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+
   const [isTaken, setIsTaken] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [serverError, setServerError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const strength = !password ? null : password.length < 8 ? "weak" : password.length < 12 ? "fair" : "strong";
 
   async function handleUsernameBlur() {
-    if (!username || username.length < 3) return;
+    if (username.length < 3) return;
     setIsValidating(true);
     const { checkUsername } = await import("@/app/actions/athleteAuth");
-    const taken = await checkUsername(username);
-    setIsTaken(taken);
+    setIsTaken(await checkUsername(username));
     setIsValidating(false);
   }
 
-  async function handleSignup(e: React.FormEvent<HTMLFormElement>) {
+  function validate(fd: FormData) {
+    const e: Record<string, string> = {};
+    const u = (fd.get("username") as string) ?? "";
+    if (u.length < 3) e.username = "At least 3 characters.";
+    const ne = validateName(fd.get("name") as string); if (ne) e.name = ne;
+    const pe = validatePhone(fd.get("phone") as string); if (pe) e.phone = pe;
+    const pwe = validatePassword(fd.get("password") as string); if (pwe) e.password = pwe;
+    if (!fd.get("sport")) e.sport = "Select your primary sport.";
+    return e;
+  }
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (isTaken || isValidating) return;
-    
-    setIsSubmitting(true);
-    setErrorMsg("");
+    const fd = new FormData(e.currentTarget);
+    const errs = validate(fd);
+    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+    setErrors({});
+    setSubmitting(true);
+    setServerError("");
     try {
-      const formData = new FormData(e.currentTarget);
       const { registerAthlete } = await import("@/app/actions/athleteAuth");
-      await registerAthlete(formData);
+      await registerAthlete(fd);
       onContinue();
     } catch (err: any) {
-      setErrorMsg(err.message);
+      setServerError(err.message);
     } finally {
-      setIsSubmitting(false);
+      setSubmitting(false);
     }
   }
 
   return (
-    <form onSubmit={handleSignup} className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-extrabold text-slate-900 mb-1">Join as a Player</h2>
-        <p className="text-slate-500 text-sm mb-4">It takes 5 minutes. Manual KYC ensures only verified players get listed.</p>
-        
-        {isTaken && (
-          <div className="mb-4">
-             <Alert type="error" message={`Username @${username} is already taken. Please pick another.`} onClose={() => setIsTaken(false)} />
-          </div>
-        )}
-        {errorMsg && (
-          <div className="mb-4">
-             <Alert type="error" message={errorMsg} onClose={() => setErrorMsg("")} />
-          </div>
-        )}
-      </div>
+    <form onSubmit={onSubmit} className="space-y-5" noValidate>
+      {isTaken && <Alert type="error" message={`Username @${username} is taken.`} onClose={() => setIsTaken(false)} />}
+      {serverError && <Alert type="error" message={serverError} onClose={() => setServerError("")} />}
 
-      <div className="space-y-4">
-        <div className="space-y-1.5">
-          <label className="block text-sm font-bold text-slate-700">Username</label>
-          <div className="relative">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">@</span>
-            <input
-              name="username"
-              required
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-              onBlur={handleUsernameBlur}
-              placeholder="your_username"
-              className={`w-full border rounded-xl pl-8 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all font-medium ${isTaken ? 'border-red-300 bg-red-50' : 'border-slate-200'} ${isValidating ? 'opacity-50' : ''}`}
-            />
-          </div>
-          <p className="text-xs text-slate-400">Must be unique (only lowercase, numbers, underscores).</p>
-        </div>
-        <div className="space-y-1.5">
-          <label className="block text-sm font-bold text-slate-700">Full Name</label>
-          <input
-            name="name"
-            required
-            type="text"
-            placeholder="As per Aadhaar card"
-            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all font-medium"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <label className="block text-sm font-bold text-slate-700">Mobile Number</label>
-          <div className="flex gap-2">
-            <span className="border border-slate-200 rounded-xl px-3 py-3 text-sm text-slate-500 font-medium bg-slate-50">+91</span>
-            <input
-              name="phone"
-              required
-              type="tel"
-              placeholder="9876543210"
-              className="flex-1 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all font-medium"
-            />
-          </div>
-        </div>
-        <div className="space-y-1.5">
-          <label className="block text-sm font-bold text-slate-700">Password</label>
-          <input
-            name="password"
-            required
-            type="password"
-            placeholder="Create a strong password"
-            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all font-medium"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <label className="block text-sm font-bold text-slate-700">Primary Sport</label>
-          <select
-            name="sport"
-            required
-            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all font-medium bg-white"
-          >
-            <option value="">Select your primary sport</option>
-            <option>Cricket</option>
-            <option>Football</option>
-            <option>Hockey (Field)</option>
-            <option>Badminton</option>
-            <option>Athletics</option>
-            <option>Wrestling</option>
-            <option>Boxing</option>
-            <option>Kabaddi</option>
-            <option>Shooting</option>
-            <option>Archery</option>
-            <option>Table Tennis</option>
-            <option>Tennis</option>
-            <option>Weightlifting</option>
-            <option>Swimming</option>
-            <option>Gymnastics</option>
-            <option>Chess</option>
-            <option>Squash</option>
-            <option>Volleyball</option>
-            <option>Basketball</option>
-            <option>Other</option>
-          </select>
-        </div>
-      </div>
-
-      <button
-        type="submit"
-        disabled={isValidating || isTaken || !username || isSubmitting}
-        className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-slate-800 disabled:opacity-40 transition-colors"
+      <Field
+        label="Username"
+        hint="3+ chars · lowercase, numbers, underscores."
+        error={errors.username || (isTaken ? "Username already taken." : undefined)}
       >
-        {isSubmitting ? "Creating Account..." : "Continue to KYC Onboarding"} <ArrowRight className="w-4 h-4" />
-      </button>
+        <PrefixInput
+          name="username"
+          prefix="@"
+          required
+          value={username}
+          onChange={(e) => {
+            setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""));
+            setErrors((p) => ({ ...p, username: "" }));
+          }}
+          onBlur={handleUsernameBlur}
+          placeholder="your_username"
+          invalid={!!errors.username || isTaken}
+        />
+      </Field>
 
-      <p className="text-center text-xs text-slate-400">
-        By continuing, you agree to DeshKa Athlete&apos;s Terms of Service and Privacy Policy.
+      <Field label="Full name" hint="As per Aadhaar card" error={errors.name}>
+        <Input
+          name="name"
+          required
+          value={name}
+          onChange={(e) => { setName(e.target.value); setErrors((p) => ({ ...p, name: "" })); }}
+          placeholder="e.g. Sunil Kumar"
+          invalid={!!errors.name}
+        />
+      </Field>
+
+      <Field label="Mobile number" error={errors.phone}>
+        <PrefixInput
+          name="phone"
+          prefix="+91"
+          required
+          inputMode="numeric"
+          value={phone}
+          onChange={(e) => {
+            setPhone(e.target.value.replace(/\D/g, "").slice(0, 10));
+            setErrors((p) => ({ ...p, phone: "" }));
+          }}
+          placeholder="9876543210"
+          invalid={!!errors.phone}
+        />
+      </Field>
+
+      <Field label="Password" error={errors.password}>
+        <Input
+          name="password"
+          type="password"
+          required
+          value={password}
+          onChange={(e) => { setPassword(e.target.value); setErrors((p) => ({ ...p, password: "" })); }}
+          placeholder="At least 8 characters"
+          invalid={!!errors.password}
+        />
+        {strength && (
+          <div className="mt-2 flex items-center gap-1.5">
+            {(["weak", "fair", "strong"] as const).map((level) => {
+              const active =
+                (strength === "weak" && level === "weak") ||
+                (strength === "fair" && (level === "weak" || level === "fair")) ||
+                strength === "strong";
+              const color =
+                strength === "weak" ? "bg-rose-400" :
+                strength === "fair" ? "bg-amber-400" : "bg-emerald-500";
+              return <span key={level} className={`h-1 flex-1 rounded-full ${active ? color : "bg-slate-200"}`} />;
+            })}
+            <span className="ml-1 text-[11px] font-medium text-slate-500 capitalize">{strength}</span>
+          </div>
+        )}
+      </Field>
+
+      <Field label="Primary sport" error={errors.sport}>
+        <Select name="sport" required onChange={() => setErrors((p) => ({ ...p, sport: "" }))} invalid={!!errors.sport} defaultValue="">
+          <option value="" disabled>Select your sport</option>
+          {["Cricket","Football","Hockey (Field)","Badminton","Athletics","Wrestling","Boxing","Kabaddi","Shooting","Archery","Table Tennis","Tennis","Weightlifting","Swimming","Gymnastics","Chess","Squash","Volleyball","Basketball","Other"].map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </Select>
+      </Field>
+
+      <Button
+        type="submit"
+        size="lg"
+        fullWidth
+        variant="dark"
+        disabled={isValidating || isTaken || !username || submitting}
+        rightIcon={<ArrowRight className="h-4 w-4" />}
+      >
+        {submitting ? "Creating account…" : "Continue to KYC"}
+      </Button>
+
+      <p className="text-center text-[11px] text-slate-400">
+        By continuing, you agree to our Terms &amp; Privacy Policy.
       </p>
     </form>
   );
 }
 
-function LoginCard({ onLogin, onForgotPassword }: { onLogin: () => void, onForgotPassword: () => void }) {
-  const [errorMsg, setErrorMsg] = useState("");
+function LoginCard({ onLogin, onForgot }: { onLogin: () => void; onForgot: () => void }) {
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
-    setErrorMsg("");
+    setError("");
     try {
-      const formData = new FormData(e.currentTarget);
+      const fd = new FormData(e.currentTarget);
       const { loginAthlete } = await import("@/app/actions/athleteAuth");
-      await loginAthlete(formData);
+      await loginAthlete(fd);
       onLogin();
     } catch (err: any) {
-      setErrorMsg(err.message);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={handleLogin} className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-extrabold text-slate-900 mb-1">Welcome back</h2>
-        <p className="text-slate-500 text-sm mb-4">
-          Log in to your player dashboard to manage bookings and earnings.
-        </p>
-        {errorMsg && (
-          <div className="mb-4">
-             <Alert type="error" message={errorMsg} onClose={() => setErrorMsg("")} />
-          </div>
-        )}
-      </div>
+    <form onSubmit={onSubmit} className="space-y-5">
+      {error && <Alert type="error" message={error} onClose={() => setError("")} />}
 
-      <div className="space-y-4">
-        <div className="space-y-1.5">
-          <label className="block text-sm font-bold text-slate-700">Username or Mobile</label>
-          <div className="flex gap-2">
-            <input
-              name="usernameOrPhone"
-              required
-              type="text"
-              placeholder="@username or 9876543210"
-              className="flex-1 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all font-medium"
-            />
-          </div>
-        </div>
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <label className="block text-sm font-bold text-slate-700">Password</label>
-            <button type="button" onClick={onForgotPassword} className="text-xs font-bold text-green-600 hover:underline">Forgot password?</button>
-          </div>
-          <input
-            name="password"
-            type="password"
-            required
-            placeholder="Enter your password"
-            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all font-medium"
-          />
-        </div>
-      </div>
+      <Field label="Username or mobile">
+        <Input name="usernameOrPhone" required placeholder="@username or 9876543210" />
+      </Field>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full bg-green-600 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-green-700 disabled:opacity-50 transition-colors"
+      <Field
+        label="Password"
+        rightSlot={
+          <button type="button" onClick={onForgot} className="text-xs font-medium text-emerald-600 hover:text-emerald-700">
+            Forgot?
+          </button>
+        }
       >
-        {loading ? "Logging in..." : "Log In to Dashboard"} <ArrowRight className="w-4 h-4" />
-      </button>
+        <Input name="password" type="password" required placeholder="••••••••" />
+      </Field>
 
-      <p className="text-center text-xs text-slate-400">
-        Don&apos;t have an account?{" "}
-        <button type="button" className="text-green-600 font-bold hover:underline">Sign up as a player</button>
-      </p>
+      <Button type="submit" size="lg" fullWidth disabled={loading} rightIcon={<ArrowRight className="h-4 w-4" />}>
+        {loading ? "Signing in…" : "Sign in"}
+      </Button>
     </form>
   );
 }
@@ -366,43 +310,43 @@ function LoginCard({ onLogin, onForgotPassword }: { onLogin: () => void, onForgo
 function ForgotPasswordCard({ onBack }: { onBack: () => void }) {
   const [step, setStep] = useState<1 | 2>(1);
   const [phone, setPhone] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSendOtp(e: React.FormEvent<HTMLFormElement>) {
+  async function sendOtp(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
-    setErrorMsg("");
+    setError("");
     try {
       const { sendPasswordResetOtp } = await import("@/app/actions/athleteAuth");
       const res = await sendPasswordResetOtp(phone);
       if (res.success) {
         setStep(2);
-        setSuccessMsg(res.message);
+        setSuccess(res.message);
       }
     } catch (err: any) {
-      setErrorMsg(err.message);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleResetPassword(e: React.FormEvent<HTMLFormElement>) {
+  async function reset(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
-    setErrorMsg("");
+    setError("");
     try {
-      const formData = new FormData(e.currentTarget);
-      formData.append("phone", phone);
+      const fd = new FormData(e.currentTarget);
+      fd.append("phone", phone);
       const { resetPasswordWithOtp } = await import("@/app/actions/athleteAuth");
-      const res = await resetPasswordWithOtp(formData);
+      const res = await resetPasswordWithOtp(fd);
       if (res.success) {
-        alert("Password reset successfully! You can now log in.");
+        alert("Password reset successfully. You can now sign in.");
         onBack();
       }
     } catch (err: any) {
-      setErrorMsg(err.message);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -410,98 +354,47 @@ function ForgotPasswordCard({ onBack }: { onBack: () => void }) {
 
   if (step === 1) {
     return (
-      <form onSubmit={handleSendOtp} className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-extrabold text-slate-900 mb-1">Reset Password</h2>
-          <p className="text-slate-500 text-sm mb-4">
-            Enter your registered mobile number to receive a 6-digit OTP.
-          </p>
-          {errorMsg && (
-            <div className="mb-4">
-              <Alert type="error" message={errorMsg} onClose={() => setErrorMsg("")} />
-            </div>
-          )}
-        </div>
+      <form onSubmit={sendOtp} className="space-y-5">
+        {error && <Alert type="error" message={error} onClose={() => setError("")} />}
 
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="block text-sm font-bold text-slate-700">Mobile Number</label>
-            <input
-              type="text"
-              required
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="e.g. 9876543210"
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all font-medium"
-            />
-          </div>
-        </div>
+        <Field label="Mobile number">
+          <PrefixInput
+            prefix="+91"
+            required
+            inputMode="numeric"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+            placeholder="9876543210"
+          />
+        </Field>
 
-        <button
-          type="submit"
-          disabled={loading || !phone}
-          className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-800 disabled:opacity-50 transition-colors"
-        >
-          {loading ? "Sending..." : "Send OTP"}
-        </button>
-
-        <button type="button" onClick={onBack} className="w-full text-center text-sm font-bold text-slate-500 hover:text-slate-900">
-          Cancel
+        <Button type="submit" size="lg" variant="dark" fullWidth disabled={loading || !phone}>
+          {loading ? "Sending…" : "Send OTP"}
+        </Button>
+        <button type="button" onClick={onBack} className="block w-full text-center text-sm text-slate-500 hover:text-slate-900">
+          Back to sign in
         </button>
       </form>
     );
   }
 
   return (
-    <form onSubmit={handleResetPassword} className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-extrabold text-slate-900 mb-1">Enter OTP</h2>
-        <p className="text-slate-500 text-sm mb-4">
-          {successMsg || "We sent a 6-digit OTP to your mobile number."}
-        </p>
-        <p className="text-xs font-bold text-blue-600 bg-blue-50 p-2 rounded max-w-max mb-4">
-          Dev Note: Check your server console for the mock OTP!
-        </p>
-        {errorMsg && (
-          <div className="mb-4">
-            <Alert type="error" message={errorMsg} onClose={() => setErrorMsg("")} />
-          </div>
-        )}
-      </div>
+    <form onSubmit={reset} className="space-y-5">
+      {error && <Alert type="error" message={error} onClose={() => setError("")} />}
+      {success && <Alert type="info" message={success} onClose={() => setSuccess("")} />}
 
-      <div className="space-y-4">
-        <div className="space-y-1.5">
-          <label className="block text-sm font-bold text-slate-700">6-Digit OTP</label>
-          <input
-            name="otp"
-            type="text"
-            required
-            placeholder="123456"
-            className="w-full tracking-widest border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all font-medium"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <label className="block text-sm font-bold text-slate-700">New Password</label>
-          <input
-            name="newPassword"
-            type="password"
-            required
-            placeholder="At least 6 characters"
-            className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all font-medium"
-          />
-        </div>
-      </div>
+      <Field label="6-digit OTP">
+        <Input name="otp" required placeholder="123456" className="tracking-[0.4em] text-center font-mono" />
+      </Field>
+      <Field label="New password">
+        <Input name="newPassword" type="password" required placeholder="At least 8 characters" />
+      </Field>
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full bg-green-600 text-white py-4 rounded-xl font-bold hover:bg-green-700 disabled:opacity-50 transition-colors"
-      >
-        {loading ? "Resetting..." : "Reset Password"}
-      </button>
-
-      <button type="button" onClick={onBack} className="w-full text-center text-sm font-bold text-slate-500 hover:text-slate-900">
-        Back to Login
+      <Button type="submit" size="lg" fullWidth disabled={loading}>
+        {loading ? "Resetting…" : "Reset password"}
+      </Button>
+      <button type="button" onClick={onBack} className="block w-full text-center text-sm text-slate-500 hover:text-slate-900">
+        Back to sign in
       </button>
     </form>
   );

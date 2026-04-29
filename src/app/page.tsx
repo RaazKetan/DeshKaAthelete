@@ -1,639 +1,440 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { motion, useInView, useMotionValue, useSpring, animate } from "framer-motion";
-import {
-  ArrowRight, ShieldCheck, Trophy, Users, Zap, Medal, Star,
-  CheckCircle2, Building2, BookOpen, Award, Lock, Phone, ChevronRight
-} from "lucide-react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  ArrowRight,
+  ShieldCheck,
+  Lock,
+  Award,
+  Users,
+  CalendarCheck,
+  Building2,
+  Wallet,
+  Sparkles,
+} from "lucide-react";
 
-/* ─── Data ─── */
-const SPORTS_MARQUEE = [
-  "🏏 Cricket", "⚽ Football", "🏸 Badminton", "🏑 Hockey", "🤼 Wrestling",
-  "🥊 Boxing", "🎯 Archery", "🏊 Swimming", "🤸 Gymnastics", "♟️ Chess",
-  "🏹 Shooting", "🏋️ Weightlifting", "🥋 Kabaddi", "🏓 Table Tennis", "🎾 Tennis",
-  "🏐 Volleyball", "🚴 Cycling", "🤺 Fencing", "🏇 Equestrian", "⛳ Golf",
+import { Button } from "@/components/ui/Button";
+import { Container } from "@/components/ui/Container";
+import { Logo } from "@/components/ui/Logo";
+import { Badge } from "@/components/ui/Badge";
+
+const SPORTS = [
+  "Cricket",
+  "Football",
+  "Hockey",
+  "Badminton",
+  "Wrestling",
+  "Boxing",
+  "Athletics",
+  "Archery",
+  "Shooting",
+  "Kabaddi",
+  "Table Tennis",
+  "Tennis",
+  "Weightlifting",
+  "Swimming",
+  "Chess",
+  "Gymnastics",
 ];
 
 const TRUST_LOGOS = [
-  "DPS Bangalore", "Oberoi International", "Ryan International", "Podar Education",
-  "Pathways School", "Inventure Academy", "The International School Bangalore",
-];
-
-const FLOATING_SPORTS = [
-  { emoji: "🏏", x: "8%",  y: "20%", delay: 0,   size: "text-3xl", dur: 6 },
-  { emoji: "⚽", x: "88%", y: "15%", delay: 1.5, size: "text-2xl", dur: 7 },
-  { emoji: "🏸", x: "5%",  y: "65%", delay: 0.8, size: "text-2xl", dur: 5.5 },
-  { emoji: "🏑", x: "92%", y: "60%", delay: 2.2, size: "text-3xl", dur: 8 },
-  { emoji: "🥊", x: "80%", y: "40%", delay: 0.5, size: "text-xl",  dur: 6.5 },
-  { emoji: "🎯", x: "12%", y: "42%", delay: 1.8, size: "text-xl",  dur: 7.5 },
-  { emoji: "🏹", x: "50%", y: "8%",  delay: 1,   size: "text-2xl", dur: 9 },
-  { emoji: "🏋️", x: "72%", y: "80%", delay: 2.5, size: "text-2xl", dur: 6 },
+  "DPS Bangalore",
+  "Oberoi International",
+  "Ryan International",
+  "Podar Education",
+  "Pathways School",
+  "Inventure Academy",
+  "TISB",
 ];
 
 const STATS = [
-  { value: 500, suffix: "+", label: "Partner Schools", sub: "Across 12 states" },
-  { value: 15,  suffix: "+", label: "Sports Covered", sub: "Olympic to regional" },
-  { value: 2,   suffix: " Cr+", label: "Paid to Athletes", sub: "And growing daily", prefix: "₹" },
-  { value: 98,  suffix: "%", label: "Session Success Rate", sub: "Based on school ratings" },
+  { value: "500+", label: "Partner schools", sub: "Across 12 cities" },
+  { value: "200+", label: "Verified athletes", sub: "Olympic to national" },
+  { value: "₹2 Cr+", label: "Paid to athletes", sub: "And growing" },
+  { value: "98%", label: "Session success", sub: "Rated by schools" },
 ];
 
 const HOW_IT_WORKS = [
   {
-    step: "01", icon: BookOpen, title: "School Browses & Books",
-    desc: "Explore verified athlete profiles filtered by sport, city, and availability. Book a session in under 2 minutes.",
-    color: "from-blue-500 to-indigo-600",
+    icon: Users,
+    title: "Browse verified athletes",
+    body:
+      "Filter by sport, city, and availability. Every profile is manually reviewed against Aadhaar, Federation IDs, and Khelo India records.",
   },
   {
-    step: "02", icon: Lock, title: "Payment Held in Escrow",
-    desc: "100% of the session fee is secured in escrow before the athlete is notified. Zero financial risk for both parties.",
-    color: "from-green-500 to-emerald-600",
+    icon: Lock,
+    title: "Pay into escrow",
+    body:
+      "Your full session fee is held by DeshKa. The athlete is only notified once payment lands. Zero risk to either side.",
   },
   {
-    step: "03", icon: Award, title: "Session Delivered & Paid",
-    desc: "After the school confirms the session is complete, payment is released to the athlete within 24 hours.",
-    color: "from-orange-500 to-amber-600",
+    icon: CalendarCheck,
+    title: "Session is delivered",
+    body:
+      "Athlete shows up. School confirms completion. Funds release to the athlete in 48 hours, minus a flat 12% platform fee.",
   },
 ];
 
 const TRUST_POINTS = [
   {
-    icon: ShieldCheck, title: "100% KYC Verified", color: "green",
-    desc: "Every athlete submits Aadhaar, Federation IDs, Khelo India certificates, and sports achievements for manual review.",
-    badge: "Manual Review"
+    icon: ShieldCheck,
+    title: "Manually verified",
+    body:
+      "Aadhaar, Federation registration, and Khelo India IDs are reviewed by humans before an athlete is listed.",
   },
   {
-    icon: Trophy, title: "Elite Tier Only", color: "amber",
-    desc: "Entry strictly limited to Olympians, Arjuna awardees, national champions, and Asian Games medalists.",
-    badge: "Invitation Only"
+    icon: Award,
+    title: "Elite tier only",
+    body:
+      "Olympians, Arjuna awardees, national champions, and Asian Games medallists. Invitation-driven supply.",
   },
   {
-    icon: Lock, title: "Escrow Payment Protection", color: "blue",
-    desc: "Your school pays the platform. Athletes are only paid after successful delivery. Zero setup costs, zero risk.",
-    badge: "PCI Compliant"
+    icon: Lock,
+    title: "Escrow protection",
+    body:
+      "Schools pay the platform, not the athlete. Funds release only after the session is confirmed delivered.",
   },
   {
-    icon: Building2, title: "Trusted by Top Schools", color: "purple",
-    desc: "Partner schools include CBSE, ICSE & IB institutions across Bangalore, Mumbai, Delhi, Hyderabad, and Pune.",
-    badge: "500+ Schools"
-  },
-  {
-    icon: Phone, title: "Dedicated Account Manager", color: "rose",
-    desc: "Every school gets a dedicated relationship manager available via phone, email and WhatsApp during business hours.",
-    badge: "9am–7pm IST"
-  },
-  {
-    icon: Star, title: "SAI & Khelo India Aligned", color: "indigo",
-    desc: "Athletes on our platform are verified against Sports Authority of India records and Khelo India databases.",
-    badge: "Govt. Verified"
+    icon: Building2,
+    title: "Built for institutions",
+    body:
+      "GST invoices, audit trail, accounts payable workflow, and a relationship manager for every school account.",
   },
 ];
 
-/* ─── Animated Counter ─── */
-function AnimatedNumber({ target, prefix = "", suffix = "" }: { target: number; prefix?: string; suffix?: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
-  const count = useMotionValue(0);
-  const rounded = useSpring(count, { duration: 2000, bounce: 0 });
-
-  useEffect(() => {
-    if (isInView) {
-      animate(count, target, { duration: 2 });
-    }
-  }, [isInView, count, target]);
-
-  useEffect(() => {
-    return rounded.on("change", (v) => {
-      if (ref.current) {
-        ref.current.textContent = `${prefix}${Math.round(v)}${suffix}`;
-      }
-    });
-  }, [rounded, prefix, suffix]);
-
-  return <span ref={ref}>{prefix}0{suffix}</span>;
-}
-
-/* ─── Variants ─── */
-const fadeUp = {
-  hidden: { opacity: 0, y: 32 },
-  visible: (i: number) => ({
-    opacity: 1, y: 0,
-    transition: { delay: i * 0.1, duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] }
-  }),
-};
-
-const stagger = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.1 } },
-};
-
-/* ─── Main Component ─── */
 export default function Home() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 20);
+    const handler = () => setScrolled(window.scrollY > 16);
     window.addEventListener("scroll", handler, { passive: true });
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
   return (
-    <div className="min-h-screen selection:bg-green-500/30 overflow-x-hidden">
-
-      {/* ── Navbar ── */}
-      <motion.nav
-        initial={{ y: -80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-          scrolled ? "bg-slate-50/90 backdrop-blur-xl border-b border-slate-200 shadow-sm" : "bg-transparent"
+    <div className="relative">
+      {/* ── Nav ── */}
+      <header
+        className={`fixed inset-x-0 top-0 z-50 transition-all duration-200 ${
+          scrolled ? "bg-white/85 backdrop-blur-md border-b border-slate-200/70" : "bg-transparent"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-green-700 to-green-400 flex items-center justify-center font-black text-white shadow-lg shadow-green-500/30">
-              DA
-            </div>
-            <div>
-              <p className="font-black text-lg text-slate-900 leading-none tracking-tight">DeshKa Athlete</p>
-              <p className="text-[10px] font-bold text-green-600 uppercase tracking-widest">India's Sports Network</p>
-            </div>
-          </Link>
-
-          <div className="hidden md:flex gap-8 text-sm font-semibold text-slate-500">
-            <a href="#how" className="hover:text-green-600 transition-colors">How It Works</a>
-            <a href="#trust" className="hover:text-green-600 transition-colors">Trust & Safety</a>
-            <Link href="/school/athletes" className="hover:text-green-600 transition-colors">For Schools</Link>
-          </div>
-
-          <div className="flex gap-3">
-            <Link
-              href="/athlete/auth"
-              className="hidden sm:flex text-sm font-bold text-slate-600 hover:text-green-700 transition-colors items-center gap-1 px-3 py-2 rounded-lg hover:bg-green-50"
-            >
-              Athlete Login
+        <Container className="flex h-16 items-center justify-between">
+          <Logo />
+          <nav className="hidden md:flex items-center gap-8 text-sm text-slate-600">
+            <a href="#how" className="hover:text-slate-900 transition-colors">How it works</a>
+            <a href="#trust" className="hover:text-slate-900 transition-colors">Trust</a>
+            <Link href="/school/athletes" className="hover:text-slate-900 transition-colors">For schools</Link>
+            <Link href="/athlete/auth" className="hover:text-slate-900 transition-colors">For athletes</Link>
+          </nav>
+          <div className="flex items-center gap-2">
+            <Link href="/athlete/auth" className="hidden sm:inline-flex">
+              <Button variant="ghost" size="sm">Log in</Button>
             </Link>
-            <Link
-              href="/school/dashboard"
-              className="bg-slate-900 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-slate-700 transition-all shadow-sm hover:shadow-md flex items-center gap-1.5"
-            >
-              School Portal
-              <ChevronRight className="w-4 h-4" />
+            <Link href="/school/auth">
+              <Button variant="dark" size="sm" rightIcon={<ArrowRight className="h-3.5 w-3.5" />}>
+                School portal
+              </Button>
             </Link>
           </div>
-        </div>
-      </motion.nav>
+        </Container>
+      </header>
 
       {/* ── Hero ── */}
-      <main className="relative min-h-screen flex flex-col items-center justify-center pt-28 sm:pt-24 pb-16 px-4 sm:px-6 overflow-hidden">
-
-        {/* Background gradient mesh */}
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute top-1/3 left-1/4 w-[600px] h-[600px] bg-green-100 rounded-full blur-[120px] opacity-60" />
-          <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-emerald-50 rounded-full blur-[100px] opacity-80" />
-          <div className="absolute top-10 right-10 w-[300px] h-[300px] bg-blue-50 rounded-full blur-[80px] opacity-50" />
+      <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28">
+        <div aria-hidden className="absolute inset-x-0 top-0 -z-10 h-[640px] overflow-hidden">
+          <div className="absolute left-1/2 top-32 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-emerald-100/50 blur-[140px]" />
         </div>
 
-        {/* Floating sports orbs — hidden on xs screens to prevent overflow */}
-        <div className="hidden sm:block">
-        {FLOATING_SPORTS.map((orb, i) => (
+        <Container size="lg" className="text-center">
           <motion.div
-            key={i}
-            className={`absolute select-none pointer-events-none ${orb.size}`}
-            style={{ left: orb.x, top: orb.y }}
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{
-              opacity: [0, 0.7, 0.5],
-              scale: [0, 1, 0.9],
-              y: [0, -18, 0],
-            }}
-            transition={{
-              opacity: { delay: orb.delay, duration: 1 },
-              scale: { delay: orb.delay, duration: 1 },
-              y: { delay: orb.delay, duration: orb.dur, repeat: Infinity, ease: "easeInOut" },
-            }}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex justify-center"
           >
-            {orb.emoji}
-          </motion.div>
-        ))}
-        </div>
-
-        <div className="max-w-5xl mx-auto flex flex-col items-center text-center relative z-10 px-2">
-
-          {/* Live badge */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-200 bg-white/80 backdrop-blur-sm mb-8 shadow-sm"
-          >
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse-dot" />
-            <span className="text-xs font-bold tracking-widest text-green-700 uppercase">Now Live in Bangalore · Mumbai · Delhi</span>
+            <Badge tone="emerald" icon={<span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse-dot" />}>
+              Live in Bangalore, Mumbai &amp; Delhi
+            </Badge>
           </motion.div>
 
-          {/* Headline */}
           <motion.h1
-            className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.05] mb-6 text-slate-900"
-            variants={stagger}
-            initial="hidden"
-            animate="visible"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.05 }}
+            className="mt-8 text-balance text-5xl sm:text-6xl lg:text-7xl font-semibold tracking-[-0.035em] leading-[1.02] text-slate-900"
           >
-            <motion.span variants={fadeUp} custom={0} className="block">
-              Elite Mentorship by
-            </motion.span>
-            <motion.span variants={fadeUp} custom={1} className="block bg-gradient-to-br from-green-600 to-green-400 bg-clip-text text-transparent pb-2">
-              India's Greatest
-            </motion.span>
-            <motion.span variants={fadeUp} custom={2} className="block">
-              Sports Stars
-            </motion.span>
+            India's verified national achievers,
+            <br />
+            <span className="text-emerald-600">one booking away.</span>
           </motion.h1>
 
           <motion.p
-            className="text-base sm:text-lg md:text-xl text-slate-500 mb-8 sm:mb-10 max-w-2xl leading-relaxed"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.6 }}
+            transition={{ duration: 0.6, delay: 0.15 }}
+            className="mt-6 text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed"
           >
-            Connect your students with verified Olympians, National Champions, and Asian Games
-            medalists — across Cricket, Football, Hockey, Badminton &amp; 12+ more sports.
+            Book Olympians, Arjuna awardees, and national champions today — with scientists,
+            civil servants, and defence personnel coming next. Aadhaar &amp; Federation verified,
+            payments held in escrow until the session is delivered.
           </motion.p>
 
-          {/* Sports marquee ticker */}
           <motion.div
-            className="w-full overflow-hidden mb-10"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8, duration: 0.6 }}
-          >
-            <div className="flex gap-3 animate-[marquee_35s_linear_infinite] whitespace-nowrap w-max">
-              {[...SPORTS_MARQUEE, ...SPORTS_MARQUEE].map((sport, i) => (
-                <span
-                  key={i}
-                  className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 px-4 py-2 rounded-full shadow-sm shrink-0"
-                >
-                  {sport}
-                </span>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* CTAs */}
-          <motion.div
-            className="flex flex-col sm:flex-row gap-4 w-full max-w-md sm:max-w-none justify-center"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 0.5 }}
+            transition={{ duration: 0.6, delay: 0.25 }}
+            className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3"
           >
-            <Link href="/school/athletes" className="bg-gradient-to-br from-green-600 to-green-500 text-white shadow-[0_4px_20px_rgba(22,163,74,0.3)] hover:shadow-[0_8px_30px_rgba(22,163,74,0.4)] transition-all hover:-translate-y-1 inline-flex items-center gap-2 px-8 py-3.5 rounded-full font-bold justify-center">
-              Browse Athletes
-              <ArrowRight className="w-5 h-5" />
+            <Link href="/school/athletes">
+              <Button size="lg" rightIcon={<ArrowRight className="h-4 w-4" />}>
+                Browse athletes
+              </Button>
             </Link>
-            <Link href="/athlete/auth" className="border-[1.5px] border-slate-200 text-slate-900 bg-transparent hover:bg-slate-100 hover:border-slate-300 px-8 py-3.5 rounded-full font-semibold transition-all inline-flex items-center gap-2 justify-center">
-              <Medal className="w-5 h-5 text-green-600" />
-              Join as an Athlete
+            <Link href="/athlete/auth">
+              <Button size="lg" variant="outline">
+                Join as an athlete
+              </Button>
             </Link>
           </motion.div>
 
-          {/* Trust micro-signals */}
           <motion.div
-            className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 mt-8 sm:mt-10 text-xs font-semibold text-slate-400"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 1.2, duration: 0.5 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-slate-500"
           >
-            {[
-              "✅ Free to browse",
-              "🔒 Escrow payment protection",
-              "📋 KYC verified athletes",
-              "🇮🇳 Made in India",
-            ].map((t, i) => (
-              <span key={i}>{t}</span>
-            ))}
+            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-slate-400" /> Free for schools to browse</span>
+            <span className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-slate-400" /> Escrow-protected payments</span>
+            <span className="inline-flex items-center gap-1.5"><Award className="h-3.5 w-3.5 text-slate-400" /> 100% manual KYC</span>
           </motion.div>
-        </div>
-      </main>
+        </Container>
 
-      {/* ── Social Proof Scroller - Schools ── */}
-      <section className="py-12 border-y border-slate-100 bg-white/80 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-6">
-          <p className="text-center text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">
-            Trusted by India's Leading Schools & Academies
+        {/* Sport marquee — quiet text-only */}
+        <div className="mt-20 overflow-hidden border-y border-slate-200/70 py-4">
+          <div className="flex whitespace-nowrap animate-marquee">
+            {[...SPORTS, ...SPORTS].map((s, i) => (
+              <span key={i} className="mx-6 text-sm font-medium text-slate-400 tracking-tight">
+                {s}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Trusted by ── */}
+      <section className="py-14">
+        <Container>
+          <p className="text-center text-xs uppercase tracking-[0.18em] text-slate-400 mb-8">
+            Trusted by India's leading institutions
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-6">
-            {TRUST_LOGOS.map((school, i) => (
-              <div key={i} className="flex items-center gap-2 text-slate-500 font-semibold text-sm">
-                <Building2 className="w-4 h-4 text-slate-300" />
-                {school}
+          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
+            {TRUST_LOGOS.map((s) => (
+              <span key={s} className="text-sm font-medium text-slate-500">
+                {s}
+              </span>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* ── Stats strip ── */}
+      <section className="py-16">
+        <Container>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-6 border-y border-slate-200 py-12">
+            {STATS.map((s) => (
+              <div key={s.label} className="text-center sm:text-left">
+                <p className="text-4xl font-semibold tracking-tight text-slate-900">{s.value}</p>
+                <p className="mt-2 text-sm font-medium text-slate-700">{s.label}</p>
+                <p className="mt-0.5 text-xs text-slate-500">{s.sub}</p>
               </div>
             ))}
           </div>
-        </div>
+        </Container>
       </section>
 
-      {/* ── Stats ── */}
-      <section className="py-24 bg-slate-900 relative overflow-hidden">
-        {/* Background glow */}
-        <div className="absolute top-0 left-1/4 w-[500px] h-[300px] bg-green-500/8 rounded-full blur-[100px]" />
-        <div className="absolute bottom-0 right-1/4 w-[400px] h-[300px] bg-emerald-500/8 rounded-full blur-[80px]" />
-
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <motion.div
-            className="grid grid-cols-2 lg:grid-cols-4 gap-8"
-            variants={stagger}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-          >
-            {STATS.map((stat, i) => (
-              <motion.div
-                key={i}
-                variants={fadeUp}
-                custom={i}
-                className="text-center"
-              >
-                <div className="text-4xl md:text-5xl font-black text-white mb-2">
-                  <AnimatedNumber target={stat.value} prefix={stat.prefix ?? ""} suffix={stat.suffix} />
-                </div>
-                <p className="text-sm font-bold text-green-400 mb-1">{stat.label}</p>
-                <p className="text-xs text-slate-500">{stat.sub}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── How It Works ── */}
-      <section id="how" className="py-24 bg-white scroll-mt-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <motion.div
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-slate-200 bg-slate-50 mb-5 text-xs font-bold text-slate-500 uppercase tracking-widest">
-              Simple Process
-            </div>
-            <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-4">
-              Book a Session in <span className="bg-gradient-to-br from-green-600 to-green-400 bg-clip-text text-transparent">3 Easy Steps</span>
+      {/* ── How it works ── */}
+      <section id="how" className="py-24 scroll-mt-20">
+        <Container>
+          <div className="max-w-2xl">
+            <Badge tone="neutral">How it works</Badge>
+            <h2 className="mt-5 text-3xl sm:text-4xl font-semibold tracking-[-0.025em] text-slate-900">
+              Three steps. Five minutes. Zero risk.
             </h2>
-            <p className="text-slate-500 text-lg max-w-xl mx-auto">
-              From browsing athletes to confirmed session — takes under 5 minutes.
+            <p className="mt-4 text-slate-600">
+              From browsing to a confirmed session — without chasing payments, federations, or middlemen.
             </p>
-          </motion.div>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-            {/* Connector line */}
-            <div className="hidden md:block absolute top-14 left-[25%] right-[25%] h-0.5 bg-gradient-to-r from-blue-200 via-green-200 to-orange-200" />
-
+          <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-px rounded-2xl overflow-hidden bg-slate-200 border border-slate-200">
             {HOW_IT_WORKS.map((step, i) => (
-              <motion.div
-                key={i}
-                className="relative"
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-60px" }}
-                transition={{ delay: i * 0.15, duration: 0.6 }}
-              >
-                <div className="p-8 rounded-3xl border border-slate-100 bg-white shadow-sm hover:shadow-xl transition-shadow duration-300 group">
-                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                    <step.icon className="w-7 h-7 text-white" />
-                  </div>
-                  <span className="text-xs font-black text-slate-300 tracking-widest uppercase">{step.step}</span>
-                  <h3 className="text-xl font-black text-slate-900 mt-2 mb-3">{step.title}</h3>
-                  <p className="text-slate-500 leading-relaxed text-sm">{step.desc}</p>
+              <div key={step.title} className="bg-white p-8">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-mono text-slate-400">0{i + 1}</span>
+                  <span className="h-px flex-1 bg-slate-200" />
                 </div>
-              </motion.div>
+                <step.icon className="mt-6 h-5 w-5 text-emerald-600" />
+                <h3 className="mt-4 text-base font-semibold text-slate-900">{step.title}</h3>
+                <p className="mt-2 text-sm text-slate-600 leading-relaxed">{step.body}</p>
+              </div>
             ))}
           </div>
-        </div>
+        </Container>
       </section>
 
-      {/* ── Trust & Safety ── */}
-      <section id="trust" className="py-24 bg-gradient-to-b from-slate-50 to-white scroll-mt-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <motion.div
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-50 border border-green-200 mb-5">
-              <ShieldCheck className="w-4 h-4 text-green-600" />
-              <span className="text-xs font-bold text-green-700 uppercase tracking-widest">Trust & Safety</span>
-            </div>
-            <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-4">
-              Built for Schools That Need to <span className="bg-gradient-to-br from-green-600 to-green-400 bg-clip-text text-transparent">Trust Every Step</span>
+      {/* ── Trust ── */}
+      <section id="trust" className="py-24 scroll-mt-20 bg-slate-50/60 border-y border-slate-200">
+        <Container>
+          <div className="max-w-2xl">
+            <Badge tone="emerald" icon={<ShieldCheck className="h-3 w-3" />}>Trust &amp; safety</Badge>
+            <h2 className="mt-5 text-3xl sm:text-4xl font-semibold tracking-[-0.025em] text-slate-900">
+              Built for the people who answer to parents and boards.
             </h2>
-            <p className="text-slate-500 text-lg max-w-2xl mx-auto">
-              We know schools are accountable to parents, principals, and boards.
-              Every safeguard exists so you can invite an athlete with zero worry.
+            <p className="mt-4 text-slate-600">
+              Every safeguard exists so a principal can invite an Olympian without writing a single risk memo.
             </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {TRUST_POINTS.map((point, i) => {
-              const colorMap: Record<string, string> = {
-                green: "bg-green-100 text-green-600 border-green-200",
-                amber: "bg-amber-100 text-amber-600 border-amber-200",
-                blue: "bg-blue-100 text-blue-600 border-blue-200",
-                purple: "bg-purple-100 text-purple-600 border-purple-200",
-                rose: "bg-rose-100 text-rose-600 border-rose-200",
-                indigo: "bg-indigo-100 text-indigo-600 border-indigo-200",
-              };
-              const badgeMap: Record<string, string> = {
-                green: "bg-green-50 text-green-700 border-green-200",
-                amber: "bg-amber-50 text-amber-700 border-amber-200",
-                blue: "bg-blue-50 text-blue-700 border-blue-200",
-                purple: "bg-purple-50 text-purple-700 border-purple-200",
-                rose: "bg-rose-50 text-rose-700 border-rose-200",
-                indigo: "bg-indigo-50 text-indigo-700 border-indigo-200",
-              };
-              return (
-                <motion.div
-                  key={i}
-                  className="p-7 rounded-3xl bg-white border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-40px" }}
-                  transition={{ delay: i * 0.08, duration: 0.55 }}
-                >
-                  <div className="flex items-start justify-between mb-5">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${colorMap[point.color]}`}>
-                      <point.icon className="w-6 h-6" />
-                    </div>
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${badgeMap[point.color]}`}>
-                      {point.badge}
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-black text-slate-900 mb-2">{point.title}</h3>
-                  <p className="text-slate-500 text-sm leading-relaxed">{point.desc}</p>
-                </motion.div>
-              );
-            })}
           </div>
-        </div>
+
+          <div className="mt-14 grid grid-cols-1 md:grid-cols-2 gap-6">
+            {TRUST_POINTS.map((p) => (
+              <div key={p.title} className="bg-white border border-slate-200 rounded-xl p-6">
+                <p.icon className="h-5 w-5 text-emerald-600" />
+                <h3 className="mt-4 text-base font-semibold text-slate-900">{p.title}</h3>
+                <p className="mt-1.5 text-sm text-slate-600 leading-relaxed">{p.body}</p>
+              </div>
+            ))}
+          </div>
+        </Container>
       </section>
 
-      {/* ── Athlete CTA Section ── */}
-      <section id="athletes" className="py-24 bg-slate-900 relative overflow-hidden scroll-mt-20">
-        <div className="absolute inset-0 -z-0">
-          <div className="absolute top-0 left-1/3 w-[600px] h-[400px] bg-green-500/10 rounded-full blur-[120px]" />
-          <div className="absolute bottom-0 right-1/3 w-[400px] h-[300px] bg-emerald-500/12 rounded-full blur-[100px]" />
+      {/* ── Athlete CTA ── */}
+      <section className="py-24 bg-slate-950 text-white relative overflow-hidden">
+        <div aria-hidden className="absolute inset-0 -z-10">
+          <div className="absolute -top-40 left-1/3 h-[500px] w-[500px] rounded-full bg-emerald-500/10 blur-[120px]" />
         </div>
-
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7 }}
-            >
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-green-500/30 bg-green-500/10 mb-8">
-                <Medal className="w-4 h-4 text-green-400" />
-                <span className="text-xs font-bold tracking-widest text-green-400 uppercase">For Athletes</span>
-              </div>
-              <h2 className="text-4xl md:text-5xl font-black text-white mb-6 leading-[1.1]">
-                Turn your <span className="bg-gradient-to-br from-green-600 to-green-400 bg-clip-text text-transparent">sporting legacy</span> into meaningful income.
+        <Container>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-7">
+              <Badge tone="slate" icon={<Sparkles className="h-3 w-3" />}>For athletes</Badge>
+              <h2 className="mt-6 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-[-0.025em] leading-[1.05]">
+                Your career on the field built a name.
+                <br />
+                <span className="text-emerald-400">Let it earn off it too.</span>
               </h2>
-              <p className="text-slate-400 text-lg mb-8 leading-relaxed">
-                If you&apos;ve competed at national or international level in any sport — schools across India
-                want to learn from you. Set your own fee, pick your schedule, get paid securely.
+              <p className="mt-5 text-slate-300 text-lg max-w-xl leading-relaxed">
+                Set your own fee. Pick your schedule. Get paid securely — within 48 hours of every session, with zero monthly fees and no chasing schools.
               </p>
 
-              <div className="space-y-4 mb-10">
+              <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 max-w-xl">
                 {[
-                  { icon: Zap, text: "Set your own fee — typically ₹8,000 to ₹50,000 per session" },
-                  { icon: Lock, text: "Payment guaranteed via escrow before you even show up" },
-                  { icon: Users, text: "Your verified profile is live to 500+ partner schools instantly" },
-                  { icon: CheckCircle2, text: "No upfront fee, no monthly subscription — zero cost to join" },
+                  { icon: Wallet, text: "₹8,000 to ₹50,000 per session — you decide" },
+                  { icon: Lock, text: "Payment guaranteed via escrow before you arrive" },
+                  { icon: Users, text: "Live to 500+ partner schools instantly" },
+                  { icon: ShieldCheck, text: "No upfront fee, no monthly subscription" },
                 ].map(({ icon: Icon, text }, i) => (
-                  <motion.div
-                    key={i}
-                    className="flex items-center gap-3"
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.1, duration: 0.5 }}
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-green-500/15 border border-green-500/20 flex items-center justify-center shrink-0">
-                      <Icon className="w-4 h-4 text-green-400" />
-                    </div>
-                    <p className="text-slate-300 text-sm font-medium">{text}</p>
-                  </motion.div>
+                  <div key={i} className="flex items-start gap-3 text-sm text-slate-300">
+                    <Icon className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <span>{text}</span>
+                  </div>
                 ))}
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link
-                  href="/athlete/auth"
-                  className="bg-green-600 hover:bg-green-500 text-white px-8 py-4 rounded-full font-black transition-all hover:scale-105 shadow-xl shadow-green-600/25 flex items-center justify-center gap-2"
-                >
-                  Apply as an Athlete
-                  <ArrowRight className="w-5 h-5" />
+              <div className="mt-10 flex flex-col sm:flex-row gap-3">
+                <Link href="/athlete/auth">
+                  <Button size="lg" rightIcon={<ArrowRight className="h-4 w-4" />}>Apply as an athlete</Button>
                 </Link>
-                <Link
-                  href="/athlete/auth"
-                  className="border border-slate-700 text-slate-300 hover:text-white hover:border-slate-500 px-8 py-4 rounded-full font-bold transition-all flex items-center justify-center"
-                >
-                  Already a member? Log in
+                <Link href="/athlete/auth">
+                  <Button size="lg" variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+                    Already a member? Log in
+                  </Button>
                 </Link>
               </div>
-            </motion.div>
+            </div>
 
-            {/* Stats cards */}
-            <motion.div
-              className="grid grid-cols-2 gap-4"
-              initial={{ opacity: 0, x: 40 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-            >
-              {[
-                { label: "Sports Covered", value: "15+", sub: "From Cricket to Archery", icon: "🏆" },
-                { label: "Avg. Session Fee", value: "₹18K", sub: "Per 60-min session", icon: "💰" },
-                { label: "Schools Onboarded", value: "500+", sub: "Across 12 cities", icon: "🏫" },
-                { label: "Paid to Athletes", value: "₹2 Cr+", sub: "And growing", icon: "📈" },
-              ].map((stat, i) => (
-                <motion.div
-                  key={stat.label}
-                  className="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-6 backdrop-blur-sm hover:border-green-500/30 hover:bg-slate-800 transition-all duration-300"
-                  whileHover={{ y: -4 }}
-                >
-                  <div className="text-2xl mb-3">{stat.icon}</div>
-                  <p className="text-3xl font-black text-white mb-1">{stat.value}</p>
-                  <p className="text-sm font-bold text-slate-400 mb-0.5">{stat.label}</p>
-                  <p className="text-xs text-slate-500">{stat.sub}</p>
-                </motion.div>
-              ))}
-            </motion.div>
+            <div className="lg:col-span-5">
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { v: "15+", l: "Sports covered", s: "Cricket → Archery" },
+                  { v: "₹18K", l: "Avg. session fee", s: "Per 60-min session" },
+                  { v: "500+", l: "Schools onboarded", s: "12 cities" },
+                  { v: "₹2 Cr+", l: "Paid to athletes", s: "And growing" },
+                ].map((s) => (
+                  <div key={s.l} className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
+                    <p className="text-2xl font-semibold tracking-tight">{s.v}</p>
+                    <p className="mt-3 text-xs font-medium text-slate-400">{s.l}</p>
+                    <p className="text-[11px] text-slate-500">{s.s}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* ── Footer ── */}
-      <footer className="bg-slate-950 text-slate-400 py-16 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-            <div>
-              <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-green-700 to-green-400 flex items-center justify-center font-black text-white text-sm shadow-sm">
-                  DA
-                </div>
-                <div>
-                  <p className="font-black text-white leading-none text-sm">DeshKa Athlete</p>
-                  <p className="text-[10px] text-green-500 font-bold uppercase tracking-widest mt-0.5">India's Sports Network</p>
-                </div>
-              </div>
-              <p className="text-sm leading-relaxed text-slate-500">
-                Connecting India's elite sports stars with schools for mentorship and inspiration.
+      <footer className="bg-white border-t border-slate-200">
+        <Container className="py-14">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
+            <div className="col-span-2 md:col-span-1">
+              <Logo />
+              <p className="mt-4 text-sm text-slate-500 leading-relaxed max-w-xs">
+                India's verified marketplace for national achievers. Built in Bangalore.
               </p>
             </div>
-            <div>
-              <h4 className="font-bold text-white text-sm mb-4 uppercase tracking-wider">Platform</h4>
-              <ul className="space-y-2.5 text-sm">
-                <li><Link href="/school/athletes" className="hover:text-white transition-colors">Browse Athletes</Link></li>
-                <li><Link href="/school/dashboard" className="hover:text-white transition-colors">School Portal</Link></li>
-                <li><Link href="/athlete/auth" className="hover:text-white transition-colors">Athlete Login</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold text-white text-sm mb-4 uppercase tracking-wider">Trust</h4>
-              <ul className="space-y-2.5 text-sm">
-                <li><a href="#trust" className="hover:text-white transition-colors">KYC Process</a></li>
-                <li><a href="#how" className="hover:text-white transition-colors">Escrow Payments</a></li>
-                <li><span className="text-slate-600">SAI Verified Athletes</span></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold text-white text-sm mb-4 uppercase tracking-wider">Legal</h4>
-              <ul className="space-y-2.5 text-sm">
-                <li><Link href="/policy/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/policy/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
-                <li><Link href="/policy/refund" className="hover:text-white transition-colors">Refund Policy</Link></li>
-              </ul>
-            </div>
+            <FooterCol
+              title="Platform"
+              links={[
+                { label: "Browse athletes", href: "/school/athletes" },
+                { label: "School portal", href: "/school/auth" },
+                { label: "Athlete login", href: "/athlete/auth" },
+              ]}
+            />
+            <FooterCol
+              title="Trust"
+              links={[
+                { label: "How it works", href: "#how" },
+                { label: "Verification", href: "#trust" },
+                { label: "Escrow payments", href: "#trust" },
+              ]}
+            />
+            <FooterCol
+              title="Legal"
+              links={[
+                { label: "Privacy", href: "/policy/privacy" },
+                { label: "Terms", href: "/policy/terms" },
+                { label: "Refunds", href: "/policy/refund" },
+              ]}
+            />
           </div>
 
-          <div className="border-t border-slate-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-slate-600">
-              © 2025 DeshKa Athlete. Proudly 🇮🇳 Made in India.
-            </p>
-            <div className="flex items-center gap-4 text-xs text-slate-600">
-              <span className="flex items-center gap-1">
-                <Lock className="w-3 h-3" /> SSL Secured
-              </span>
-              <span>PCI-DSS Compliant Payments</span>
-              <span>SAI & Khelo India Aligned</span>
+          <div className="mt-12 pt-6 border-t border-slate-200 flex flex-col sm:flex-row gap-3 items-center justify-between text-xs text-slate-500">
+            <p>© {new Date().getFullYear()} Crests by DeshKa · Made in India</p>
+            <div className="flex items-center gap-5">
+              <span className="inline-flex items-center gap-1.5"><Lock className="h-3 w-3" /> SSL secured</span>
+              <span>PCI-DSS compliant</span>
             </div>
           </div>
-        </div>
+        </Container>
       </footer>
+    </div>
+  );
+}
+
+function FooterCol({ title, links }: { title: string; links: { label: string; href: string }[] }) {
+  return (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-wider text-slate-900">{title}</p>
+      <ul className="mt-4 space-y-2.5">
+        {links.map((l) => (
+          <li key={l.label}>
+            <Link href={l.href} className="text-sm text-slate-500 hover:text-slate-900 transition-colors">
+              {l.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

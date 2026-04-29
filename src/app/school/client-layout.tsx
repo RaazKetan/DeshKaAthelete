@@ -45,13 +45,16 @@ export default function ClientLayout({ children, school }: { children: React.Rea
         style={{ borderBottom: "1px solid var(--school-border)" }}
       >
         <Link href="/" className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center font-black text-white text-sm shadow-md shadow-indigo-500/25">
-            DA
+          <div className="w-9 h-9 rounded-md bg-slate-900 flex items-center justify-center text-white">
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 3l8 3v6c0 4.5-3.4 8.5-8 9.5C7.4 20.5 4 16.5 4 12V6l8-3z" />
+              <path d="M9 11l2.4 2.4L15 9.5" />
+            </svg>
           </div>
           <div>
-            <p className="font-black text-slate-900 text-sm leading-none tracking-tight">DeshKa Athlete</p>
+            <p className="font-semibold text-slate-900 text-sm leading-none tracking-tight">Crests</p>
             <p
-              className="text-[10px] font-bold uppercase tracking-widest mt-0.5"
+              className="text-[10px] font-medium uppercase tracking-widest mt-1"
               style={{ color: "var(--school-accent)" }}
             >
               School Portal
