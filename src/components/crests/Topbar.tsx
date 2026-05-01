@@ -10,7 +10,7 @@ type Role = "booker" | "speaker";
 const BOOKER_NAV = [
   { id: "/", label: "Discover" },
   { id: "/browse", label: "All speakers" },
-  { id: "/how", label: "How it works" },
+  { id: "/#how", label: "How it works" },
 ];
 
 const SPEAKER_NAV = [

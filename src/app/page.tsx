@@ -27,12 +27,6 @@ const HOW_IT_WORKS: [string, string, string][] = [
     "Speaker arrives. We follow up with a recap deck and reusable clips for your alumni."],
 ];
 
-const BULK_PACKAGES: [string, string, string][] = [
-  ["8 sessions", "Termly", "₹14L"],
-  ["16 sessions", "Year-round · save 12%", "₹26L"],
-  ["24 sessions", "Multi-campus · save 28%", "₹36L"],
-];
-
 export default function Home() {
   const featured = SPEAKERS.slice(0, 4);
 
@@ -288,7 +282,7 @@ export default function Home() {
         </section>
 
         {/* ── HOW IT WORKS ── */}
-        <section style={{ padding: "80px 0" }}>
+        <section id="how" style={{ padding: "80px 0", scrollMarginTop: 80 }}>
           <div className="container-1320">
             <div className="eyebrow">How it works</div>
             <h2
@@ -395,91 +389,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── BULK CTA ── */}
-        <section style={{ padding: "80px 0" }}>
-          <div className="container-1320">
-            <div
-              style={{
-                border: "2px solid var(--ink)",
-                display: "grid",
-                gridTemplateColumns: "1.2fr 1fr",
-                background: "var(--marigold)",
-                color: "var(--ink)",
-              }}
-            >
-              <div style={{ padding: 48, borderRight: "2px solid var(--ink)" }}>
-                <div className="eyebrow" style={{ color: "var(--ink)" }}>
-                  Bulk packages
-                </div>
-                <h2
-                  className="serif"
-                  style={{
-                    fontSize: "clamp(36px, 4.5vw, 56px)",
-                    margin: "14px 0 14px",
-                    fontWeight: 700,
-                    color: "var(--ink)",
-                    letterSpacing: "-0.02em",
-                    lineHeight: 1.05,
-                  }}
-                >
-                  A speaker every Friday for your school year.
-                </h2>
-                <p
-                  style={{
-                    color: "var(--ink-2)",
-                    maxWidth: 540,
-                    fontSize: 16,
-                    lineHeight: 1.55,
-                    margin: 0,
-                  }}
-                >
-                  Build an annual program with 8–24 speakers across categories. Lock in dates a year
-                  ahead, save up to 28%, and let your alumni team co-host with the bureau.
-                </p>
-                <Link
-                  href="/booker/auth/signup"
-                  className="btn lg"
-                  style={{
-                    marginTop: 28,
-                    background: "var(--ink)",
-                    color: "var(--paper)",
-                    borderColor: "var(--ink)",
-                  }}
-                >
-                  Design my year-long program →
-                </Link>
-              </div>
-
-              <div style={{ padding: 48 }}>
-                {BULK_PACKAGES.map(([title, desc, fee], i) => (
-                  <div
-                    key={title}
-                    style={{
-                      padding: "20px 0",
-                      borderTop: i ? "1.5px solid var(--ink)" : 0,
-                      display: "grid",
-                      gridTemplateColumns: "1fr auto",
-                      gap: 16,
-                      alignItems: "baseline",
-                    }}
-                  >
-                    <div>
-                      <div className="serif" style={{ fontSize: 26, color: "var(--ink)", fontWeight: 700 }}>
-                        {title}
-                      </div>
-                      <div className="mono" style={{ fontSize: 12, color: "var(--ink-2)", marginTop: 4 }}>
-                        {desc}
-                      </div>
-                    </div>
-                    <div className="serif" style={{ fontSize: 28, fontWeight: 700 }}>
-                      {fee}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
 
       <Footer />
