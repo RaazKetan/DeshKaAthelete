@@ -5,26 +5,28 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 
+import {
+  schoolSignupSchema,
+  schoolLoginSchema,
+  parseFormData,
+} from "@/lib/validation";
+import { signupLimit, authLimit, enforce, getClientIp } from "@/lib/rate-limit";
+
 const SALT_ROUNDS = 12;
 
+function firstError(errors: Record<string, string>): string {
+  const key = Object.keys(errors)[0];
+  return errors[key] ?? "Validation failed.";
+}
+
 export async function registerSchool(formData: FormData) {
-  const name     = formData.get("name")     as string;
-  const city     = formData.get("city")     as string;
-  const contact  = formData.get("contact")  as string;
-  const password = formData.get("password") as string;
+  await enforce(signupLimit, await getClientIp());
 
-  if (!name || !city || !contact || !password) {
-    throw new Error("All fields are required.");
-  }
+  const parsed = parseFormData(schoolSignupSchema, formData);
+  if (!parsed.ok) throw new Error(firstError(parsed.errors));
+  const { name, city, contact, password } = parsed.data;
 
-  if (password.length < 8) {
-    throw new Error("Password must be at least 8 characters.");
-  }
-
-  const existing = await prisma.user.findFirst({
-    where: { phone: contact },
-  });
-
+  const existing = await prisma.user.findFirst({ where: { phone: contact } });
   if (existing) {
     throw new Error("A school is already registered with this contact number.");
   }
@@ -36,13 +38,7 @@ export async function registerSchool(formData: FormData) {
       phone: contact,
       password: hashedPassword,
       role: "SCHOOL",
-      school: {
-        create: {
-          name,
-          city,
-          contact,
-        },
-      },
+      school: { create: { name, city, contact } },
     },
     include: { school: true },
   });
@@ -60,12 +56,11 @@ export async function registerSchool(formData: FormData) {
 }
 
 export async function loginSchool(formData: FormData) {
-  const contact  = formData.get("contact")  as string;
-  const password = formData.get("password") as string;
+  await enforce(authLimit, await getClientIp());
 
-  if (!contact || !password) {
-    throw new Error("Contact number and password are required.");
-  }
+  const parsed = parseFormData(schoolLoginSchema, formData);
+  if (!parsed.ok) throw new Error(firstError(parsed.errors));
+  const { contact, password } = parsed.data;
 
   const user = await prisma.user.findFirst({
     where: { phone: contact, role: "SCHOOL", deletedAt: null },
@@ -76,10 +71,8 @@ export async function loginSchool(formData: FormData) {
     throw new Error("No school found with this contact number.");
   }
 
-  const passwordValid = await bcrypt.compare(password, user.password);
-  if (!passwordValid) {
-    throw new Error("Incorrect password.");
-  }
+  const valid = await bcrypt.compare(password, user.password);
+  if (!valid) throw new Error("Incorrect password.");
 
   const cookieStore = await cookies();
   cookieStore.set("auth_school_id", user.school.id, {

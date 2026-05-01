@@ -5,44 +5,46 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 
+import {
+  athleteSignupSchema,
+  athleteLoginSchema,
+  passwordResetRequestSchema,
+  passwordResetCompleteSchema,
+  parseFormData,
+  parseObject,
+} from "@/lib/validation";
+import { signupLimit, authLimit, otpLimit, enforce, getClientIp } from "@/lib/rate-limit";
+
 const SALT_ROUNDS = 12;
+
+function firstError(errors: Record<string, string>): string {
+  const key = Object.keys(errors)[0];
+  return errors[key] ?? "Validation failed.";
+}
 
 // ─── Check if a username is already taken ────────────────────────────────────
 export async function checkUsername(username: string) {
   if (!username) return false;
-
   const existing = await prisma.user.findUnique({
     where: { username },
     select: { id: true },
   });
-
   return !!existing;
 }
 
 // ─── Register a new Athlete (creates User + linked Athlete) ──────────────────
 export async function registerAthlete(formData: FormData) {
-  const username = formData.get("username") as string;
-  const phone    = formData.get("phone")    as string;
-  const password = formData.get("password") as string;
-  const name     = formData.get("name")     as string;
-  const sport    = formData.get("sport")    as string;
+  await enforce(signupLimit, await getClientIp());
 
-  if (!username || !phone || !password || !name || !sport) {
-    throw new Error("All registration fields are required.");
-  }
-
-  if (password.length < 8) {
-    throw new Error("Password must be at least 8 characters.");
-  }
+  const parsed = parseFormData(athleteSignupSchema, formData);
+  if (!parsed.ok) throw new Error(firstError(parsed.errors));
+  const { username, name, phone, password, sport } = parsed.data;
 
   const existing = await prisma.user.findFirst({
     where: { OR: [{ username }, { phone }] },
     select: { id: true },
   });
-
-  if (existing) {
-    throw new Error("Username or phone number is already registered.");
-  }
+  if (existing) throw new Error("Username or phone number is already registered.");
 
   const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
@@ -53,11 +55,7 @@ export async function registerAthlete(formData: FormData) {
       password: hashedPassword,
       role: "ATHLETE",
       athlete: {
-        create: {
-          name,
-          sport,
-          isVerified: false,
-        },
+        create: { name, sport, isVerified: false },
       },
     },
     include: { athlete: true },
@@ -77,19 +75,15 @@ export async function registerAthlete(formData: FormData) {
 
 // ─── Login an existing Athlete ───────────────────────────────────────────────
 export async function loginAthlete(formData: FormData) {
-  const usernameOrPhone = formData.get("usernameOrPhone") as string;
-  const password        = formData.get("password")        as string;
+  await enforce(authLimit, await getClientIp());
 
-  if (!usernameOrPhone || !password) {
-    throw new Error("Username/phone and password are required.");
-  }
+  const parsed = parseFormData(athleteLoginSchema, formData);
+  if (!parsed.ok) throw new Error(firstError(parsed.errors));
+  const { usernameOrPhone, password } = parsed.data;
 
   const user = await prisma.user.findFirst({
     where: {
-      OR: [
-        { username: usernameOrPhone },
-        { phone:    usernameOrPhone },
-      ],
+      OR: [{ username: usernameOrPhone }, { phone: usernameOrPhone }],
       role: "ATHLETE",
       deletedAt: null,
     },
@@ -97,13 +91,11 @@ export async function loginAthlete(formData: FormData) {
   });
 
   if (!user || !user.athlete || !user.password) {
-    throw new Error("No player found with this username or mobile number.");
+    throw new Error("No athlete found with this username or mobile number.");
   }
 
-  const passwordValid = await bcrypt.compare(password, user.password);
-  if (!passwordValid) {
-    throw new Error("Incorrect password.");
-  }
+  const valid = await bcrypt.compare(password, user.password);
+  if (!valid) throw new Error("Incorrect password.");
 
   const cookieStore = await cookies();
   cookieStore.set("auth_athlete_id", user.athlete.id, {
@@ -119,66 +111,67 @@ export async function loginAthlete(formData: FormData) {
 
 // ─── Send OTP for password reset ─────────────────────────────────────────────
 export async function sendPasswordResetOtp(phone: string) {
-  if (!phone) throw new Error("Phone number is required.");
+  const parsed = parseObject(passwordResetRequestSchema, { phone });
+  if (!parsed.ok) throw new Error(firstError(parsed.errors));
+  const validPhone = parsed.data.phone;
+
+  // OTPs cost real SMS money — limit by phone, not IP, so attackers can't
+  // burn budget by rotating IPs on a single number.
+  await enforce(otpLimit, validPhone);
 
   const user = await prisma.user.findUnique({
-    where: { phone },
+    where: { phone: validPhone },
     select: { id: true, role: true },
   });
-
   if (!user || user.role !== "ATHLETE") {
     throw new Error("No athlete registered with this phone number.");
   }
 
-  const otp    = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 min
 
   await prisma.user.update({
-    where: { phone },
+    where: { phone: validPhone },
     data: { resetOtp: otp, resetOtpExpiry: expiry },
   });
 
   // TODO: Replace with real SMS gateway (Twilio/MSG91)
-  console.log(`[SMS Mock] OTP for ${phone}: ${otp}`);
+  console.log(`[SMS Mock] OTP for ${validPhone}: ${otp}`);
 
   return { success: true, message: "OTP sent to your mobile number." };
 }
 
 // ─── Reset password after verifying OTP ──────────────────────────────────────
 export async function resetPasswordWithOtp(formData: FormData) {
-  const phone       = formData.get("phone")       as string;
-  const otp         = formData.get("otp")         as string;
-  const newPassword = formData.get("newPassword") as string;
+  await enforce(authLimit, await getClientIp());
 
-  if (!phone || !otp || !newPassword) {
-    throw new Error("Phone, OTP, and new password are required.");
-  }
-
-  if (newPassword.length < 8) {
-    throw new Error("New password must be at least 8 characters.");
-  }
+  const parsed = parseFormData(passwordResetCompleteSchema, formData);
+  if (!parsed.ok) throw new Error(firstError(parsed.errors));
+  const { phone, otp, newPassword } = parsed.data;
 
   const user = await prisma.user.findUnique({
     where: { phone },
     select: { id: true, role: true, resetOtp: true, resetOtpExpiry: true },
   });
 
-  if (!user || user.role !== "ATHLETE") throw new Error("Player not found.");
+  if (!user || user.role !== "ATHLETE") throw new Error("Athlete not found.");
   if (!user.resetOtp || user.resetOtp !== otp) throw new Error("Invalid OTP.");
-  if (!user.resetOtpExpiry || user.resetOtpExpiry < new Date()) throw new Error("OTP has expired.");
+  if (!user.resetOtpExpiry || user.resetOtpExpiry < new Date()) {
+    throw new Error("OTP has expired.");
+  }
 
   const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
 
   await prisma.user.update({
     where: { phone },
     data: {
-      password:       hashedPassword,
-      resetOtp:       null,
+      password: hashedPassword,
+      resetOtp: null,
       resetOtpExpiry: null,
     },
   });
 
-  return { success: true, message: "Password reset successfully! You can now log in." };
+  return { success: true, message: "Password reset successfully." };
 }
 
 // ─── Logout ──────────────────────────────────────────────────────────────────

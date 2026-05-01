@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { cookies } from "next/headers";
+import { adminLimit, getClientIp, RateLimitError } from "@/lib/rate-limit";
 
 // GET /api/athletes — public marketplace listing (verified athletes only)
 export async function GET() {
@@ -36,6 +36,14 @@ export async function POST(request: NextRequest) {
 
   if (!adminKey || authHeader !== `Bearer ${adminKey}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const limit = await adminLimit.limit(await getClientIp());
+  if (!limit.success) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { "retry-after": String(Math.ceil((limit.reset - Date.now()) / 1000)) } },
+    );
   }
 
   try {
