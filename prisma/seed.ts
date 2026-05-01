@@ -5,10 +5,10 @@ async function seed() {
 
   const athletes = [
     {
-      name: 'Neeraj Chopra',
+      fullName: 'Neeraj Chopra',
       sport: 'Athletics – Javelin Throw',
-      bio: "India's first Olympic gold medalist in a track and field event. A phenomenal journey from Panipat to Paris.",
-      pricingSession: 75000,
+      story: "India's first Olympic gold medalist in a track and field event. A phenomenal journey from Panipat to Paris.",
+      basePrice: 75000,
       isVerified: true,
       achievements: [
         { title: 'Olympic Gold – Tokyo 2020', year: 2021 },
@@ -18,10 +18,10 @@ async function seed() {
       ],
     },
     {
-      name: 'Mirabai Chanu',
+      fullName: 'Mirabai Chanu',
       sport: 'Weightlifting',
-      bio: "India's pride in weightlifting. Silver medalist at Tokyo Olympics and Commonwealth Champion.",
-      pricingSession: 50000,
+      story: "India's pride in weightlifting. Silver medalist at Tokyo Olympics and Commonwealth Champion.",
+      basePrice: 50000,
       isVerified: true,
       achievements: [
         { title: 'Olympic Silver – Tokyo 2020', year: 2021 },
@@ -30,10 +30,10 @@ async function seed() {
       ],
     },
     {
-      name: 'P.V. Sindhu',
+      fullName: 'P.V. Sindhu',
       sport: 'Badminton',
       bio: 'Two-time Olympic medalist and World Champion. One of the most recognizable athletes in India.',
-      pricingSession: 60000,
+      basePrice: 60000,
       isVerified: true,
       achievements: [
         { title: 'Olympic Silver – Rio 2016', year: 2016 },
@@ -42,10 +42,10 @@ async function seed() {
       ],
     },
     {
-      name: 'Manu Bhaker',
+      fullName: 'Manu Bhaker',
       sport: 'Shooting – 10m Air Pistol',
-      bio: "History-maker at Paris 2024, winning two bronze medals—India's first double-medalist at a single Olympics.",
-      pricingSession: 40000,
+      story: "History-maker at Paris 2024, winning two bronze medals—India's first double-medalist at a single Olympics.",
+      basePrice: 40000,
       isVerified: true,
       achievements: [
         { title: 'Olympic Bronze – Paris 2024 (×2)', year: 2024 },
@@ -54,10 +54,10 @@ async function seed() {
       ],
     },
     {
-      name: 'Avinash Sable',
+      fullName: 'Avinash Sable',
       sport: 'Athletics – 3000m Steeplechase',
       bio: 'National record holder and Asian Games gold medalist. Inspired millions through a journey from the Indian Army.',
-      pricingSession: 25000,
+      basePrice: 25000,
       isVerified: true,
       achievements: [
         { title: 'Asian Games Gold 2022', year: 2022 },
@@ -66,10 +66,10 @@ async function seed() {
       ],
     },
     {
-      name: 'Ravi Kumar Dahiya',
+      fullName: 'Ravi Kumar Dahiya',
       sport: 'Wrestling – Freestyle 57kg',
       bio: 'Chhattarpur boy who became an Olympic silver medalist through sheer grit and discipline.',
-      pricingSession: 30000,
+      basePrice: 30000,
       isVerified: true,
       achievements: [
         { title: 'Olympic Silver – Tokyo 2020', year: 2021 },
@@ -78,10 +78,10 @@ async function seed() {
       ],
     },
     {
-      name: 'Nikhat Zareen',
+      fullName: 'Nikhat Zareen',
       sport: 'Boxing',
       bio: 'Two-time World Boxing Champion who broke barriers and inspired a generation of women boxers in India.',
-      pricingSession: 35000,
+      basePrice: 35000,
       isVerified: true,
       achievements: [
         { title: 'World Champion 2022', year: 2022 },
@@ -90,10 +90,10 @@ async function seed() {
       ],
     },
     {
-      name: 'Sreejesh P.R.',
+      fullName: 'Sreejesh P.R.',
       sport: 'Hockey (Field) – Goalkeeping',
-      bio: "India's legendary goalkeeper who captained the national team to multiple victories including an Olympic bronze.",
-      pricingSession: 45000,
+      story: "India's legendary goalkeeper who captained the national team to multiple victories including an Olympic bronze.",
+      basePrice: 45000,
       isVerified: true,
       achievements: [
         { title: 'Olympic Bronze – Tokyo 2020', year: 2021 },
@@ -106,25 +106,25 @@ async function seed() {
   for (const athleteData of athletes) {
     const { achievements, ...athleteFields } = athleteData;
     
-    const athlete = await prisma.athlete.upsert({
-      where: { id: athleteFields.name.toLowerCase().replace(/\s/g, '-').replace(/[^a-z0-9-]/g, '') },
+    const athlete = await prisma.speaker.upsert({
+      where: { id: athleteFields.fullName.toLowerCase().replace(/\s/g, '-').replace(/[^a-z0-9-]/g, '') },
       update: {
         ...athleteFields,
-        pricingSession: athleteFields.pricingSession,
+        basePrice: athleteFields.basePrice,
       },
       create: {
-        id: athleteFields.name.toLowerCase().replace(/\s/g, '-').replace(/[^a-z0-9-]/g, ''),
+        id: athleteFields.fullName.toLowerCase().replace(/\s/g, '-').replace(/[^a-z0-9-]/g, ''),
         ...athleteFields,
-        pricingSession: athleteFields.pricingSession,
+        basePrice: athleteFields.basePrice,
       },
     });
 
     // Delete old achievements for this athlete and re-create
-    await prisma.achievement.deleteMany({ where: { athleteId: athlete.id } });
+    await prisma.achievement.deleteMany({ where: { speakerId: athlete.id } });
     for (const ach of achievements) {
       await prisma.achievement.create({
         data: {
-          athleteId: athlete.id,
+          speakerId: athlete.id,
           title: ach.title,
           year: ach.year,
           isVerified: true,
@@ -132,7 +132,7 @@ async function seed() {
       });
     }
 
-    console.log(`  ✅ Seeded: ${athlete.name} (${achievements.length} achievements)`);
+    console.log(`  ✅ Seeded: ${athlete.fullName} (${achievements.length} achievements)`);
   }
 
   console.log('\n🎉 Seeding complete!');

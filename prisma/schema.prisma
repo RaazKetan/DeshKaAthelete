@@ -1,5 +1,7 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Crests — Prisma schema
+// Models renamed Athlete→Speaker, School→Buyer in code. Physical tables
+// preserved via @@map so the existing dev DB still binds. New columns
+// (category, status, etc.) get added on `prisma db push`.
 
 generator client {
   provider = "prisma-client-js"
@@ -14,23 +16,92 @@ datasource db {
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
 enum Role {
-  ATHLETE
-  SCHOOL
+  SPEAKER
+  BOOKER
   ADMIN
 }
 
-enum BookingStatus {
-  PENDING
-  CONFIRMED
-  COMPLETED
-  CANCELLED
-  REJECTED
+enum SpeakerCategory {
+  ATHLETE
+  DOCTOR // Doctors & Scientists
+  BUSINESS // Founders, executives
+  DEFENCE // Armed Forces, Police
+  CREATOR // Filmmakers, journalists, content creators
+  DIPLOMAT // IFS, IAS, IPS, IRS
+  ARTIST // Musicians, performers
+  AUTHOR
 }
 
-enum SessionType {
+enum SpeakerStatus {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum BuyerType {
+  SCHOOL
+  COLLEGE // College / University
+  COMPANY
+  NONPROFIT
+  GOVERNMENT
+}
+
+enum BuyerStatus {
+  PENDING_VERIFICATION
+  ACTIVE
+  SUSPENDED
+}
+
+enum BookingStatus {
+  PENDING_PAYMENT
+  PENDING_ACCEPT
+  CONFIRMED
+  COMPLETED
+  DECLINED
+  CANCELLED
+  EXPIRED
+  REFUNDED
+  DISPUTED
+}
+
+enum SessionFormat {
+  KEYNOTE
   WORKSHOP
-  TALK
-  TRAINING
+  ONE_ON_ONE // 1:1 mentoring
+  GROUP_SESSION
+  FIRESIDE_CHAT
+  PANEL
+  Q_AND_A
+  PERFORMANCE
+}
+
+enum SessionMode {
+  IN_PERSON
+  VIRTUAL
+  HYBRID
+}
+
+enum GroupSize {
+  SINGLE
+  GROUP
+  OPEN
+}
+
+enum TimeOfDay {
+  MORNING
+  AFTERNOON
+  EVENING
+}
+
+enum FeeRange {
+  HONORARIUM
+  RANGE_50_150
+  RANGE_150_300
+  RANGE_300_500
+  RANGE_500_1000
+  RANGE_1000_PLUS
 }
 
 enum EscrowStatus {
@@ -38,12 +109,21 @@ enum EscrowStatus {
   HELD
   RELEASED
   REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum PayoutStatus {
+  SCHEDULED
+  IN_TRANSIT
+  PAID
+  FAILED
 }
 
 enum NotificationType {
   SMS
   EMAIL
   IN_APP
+  WHATSAPP
 }
 
 enum NotificationStatus {
@@ -52,186 +132,458 @@ enum NotificationStatus {
   FAILED
 }
 
-// ─── User (unified auth) ─────────────────────────────────────────────────────
+enum DocumentType {
+  AADHAAR
+  PAN
+  FEDERATION_REGISTRATION
+  KHELO_INDIA_CERTIFICATE
+  ACHIEVEMENT_CERTIFICATE
+  SERVICE_RECORD
+  COMMISSION_LETTER
+  CADRE_DOCUMENT
+  INSTITUTIONAL_AFFILIATION
+  PUBLICATION_PROOF
+  UDISE_CERTIFICATE
+  AISHE_CERTIFICATE
+  GSTIN_PROOF
+  OTHER
+}
+
+// ─── User (auth) ─────────────────────────────────────────────────────────────
 
 model User {
-  id             String         @id @default(cuid())
+  id             String    @id @default(cuid())
   role           Role
-  username       String?        @unique
-  phone          String?        @unique
-  password       String?        // bcrypt hash
+  username       String?   @unique
+  email          String?   @unique
+  phone          String?   @unique
+  password       String? // bcrypt
   resetOtp       String?
   resetOtpExpiry DateTime?
 
-  athleteId      String?        @unique
-  athlete        Athlete?       @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  speakerId String?  @unique
+  speaker   Speaker? @relation(fields: [speakerId], references: [id], onDelete: Cascade)
 
-  schoolId       String?        @unique
-  school         School?        @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  buyerId String? @unique
+  buyer   Buyer?  @relation(fields: [buyerId], references: [id], onDelete: Cascade)
 
-  notifications  Notification[]
-
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-  deletedAt      DateTime?
-}
-
-// ─── Athlete ─────────────────────────────────────────────────────────────────
-
-model Athlete {
-  id               String        @id @default(cuid())
-  user             User?
-  name             String
-  sport            String
-  bio              String?
-  pricingSession   Decimal       @db.Decimal(10,2) @default(10000.00)
-  currency         String        @default("INR")
-  isVerified       Boolean       @default(false)
-  avatarUrl        String?
-  aadhaarLastFour  String?
-  federationId     String?
-  kheloIndiaId     String?
-  verificationDocs String[]
-
-  achievements     Achievement[]
-  bookings         Booking[]
-  reviews          Review[]
-
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  deletedAt        DateTime?
-
-  @@index([sport, isVerified])
-  @@index([deletedAt])
-}
-
-// ─── Achievement ─────────────────────────────────────────────────────────────
-
-model Achievement {
-  id          String   @id @default(cuid())
-  athleteId   String
-  athlete     Athlete  @relation(fields: [athleteId], references: [id], onDelete: Cascade)
-  title       String
-  description String?
-  year        Int?
-  isVerified  Boolean  @default(false)
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  deletedAt   DateTime?
-
-  @@index([athleteId])
-}
-
-// ─── School ──────────────────────────────────────────────────────────────────
-
-model School {
-  id        String    @id @default(cuid())
-  user      User?
-  name      String
-  city      String
-  contact   String?
-
-  bookings  Booking[]
-  reviews   Review[]
+  notifications Notification[]
+  adminActions  AdminAction[]  @relation("AdminUserActions")
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  @@index([deletedAt])
+  @@index([email])
+  @@index([phone])
 }
 
-// ─── Session (event type template per booking) ───────────────────────────────
+// ─── Speaker (supply side) ───────────────────────────────────────────────────
+
+model Speaker {
+  id       String          @id @default(cuid())
+  user     User?
+  category SpeakerCategory @default(ATHLETE)
+  status   SpeakerStatus   @default(DRAFT)
+
+  // Public profile
+  fullName  String   @map("name") // legacy column
+  title     String? // "Maj.", "Dr.", etc.
+  handle    String? // "Olympic Hockey Forward"
+  headline  String?
+  story     String?
+  whyTeach  String?
+  photoUrl  String?  @map("avatarUrl")
+  city      String?
+  state     String?
+  languages String[] @default([])
+
+  // Pricing
+  basePrice Decimal   @default(15000.00) @map("pricingSession") @db.Decimal(12, 2)
+  currency  String    @default("INR")
+  feeRange  FeeRange?
+  feeMin    Decimal?  @db.Decimal(12, 2)
+  feeMax    Decimal?  @db.Decimal(12, 2)
+
+  // Availability
+  availableDays String[] @default([])
+
+  // Verification
+  isVerified       Boolean   @default(false) // legacy bool, kept until status migration completes
+  aadhaarLastFour  String?
+  verifyingBody    String?
+  representedSince Int?
+  verifiedAt       DateTime?
+  verifiedBy       String?
+  rejectionReason  String?
+
+  // Content
+  topics  String[]        @default([])
+  formats SessionFormat[] @default([])
+
+  // Legacy athlete-only columns (still filled for ATHLETE category)
+  sport            String? // moved to AthleteProfile in time
+  federationId     String?
+  kheloIndiaId     String?
+  verificationDocs String[] @default([])
+
+  // Per-category profiles (1:1)
+  athleteProfile  AthleteProfile?
+  doctorProfile   DoctorProfile?
+  businessProfile BusinessProfile?
+  defenceProfile  DefenceProfile?
+  creatorProfile  CreatorProfile?
+  diplomatProfile DiplomatProfile?
+  artistProfile   ArtistProfile?
+  authorProfile   AuthorProfile?
+
+  // Relations
+  references   SpeakerReference[]
+  achievements Achievement[]
+  documents    VerificationDocument[]
+  bookings     Booking[]
+  reviews      Review[]
+  payouts      Payout[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([category, status])
+  @@index([city])
+  @@index([sport, isVerified])
+  @@index([deletedAt])
+  @@map("Athlete")
+}
+
+// ─── Per-category profile tables ─────────────────────────────────────────────
+
+model AthleteProfile {
+  id           String  @id @default(cuid())
+  speakerId    String  @unique
+  speaker      Speaker @relation(fields: [speakerId], references: [id], onDelete: Cascade)
+  sport        String
+  highestLevel String?
+  federationId String?
+  kheloIndiaId String?
+
+  @@index([sport])
+}
+
+model DoctorProfile {
+  id             String  @id @default(cuid())
+  speakerId      String  @unique
+  speaker        Speaker @relation(fields: [speakerId], references: [id], onDelete: Cascade)
+  specialization String
+  institution    String?
+  registrationNo String?
+  notableWork    String?
+}
+
+model BusinessProfile {
+  id            String   @id @default(cuid())
+  speakerId     String   @unique
+  speaker       Speaker  @relation(fields: [speakerId], references: [id], onDelete: Cascade)
+  company       String
+  role          String
+  industry      String?
+  fundingRaised Decimal? @db.Decimal(14, 2)
+}
+
+model DefenceProfile {
+  id          String    @id @default(cuid())
+  speakerId   String    @unique
+  speaker     Speaker   @relation(fields: [speakerId], references: [id], onDelete: Cascade)
+  serviceArm  String // "ARMY" | "NAVY" | "AIR_FORCE" | "POLICE"
+  rank        String
+  unit        String?
+  retiredAt   DateTime?
+  decorations String[]  @default([])
+}
+
+model CreatorProfile {
+  id          String  @id @default(cuid())
+  speakerId   String  @unique
+  speaker     Speaker @relation(fields: [speakerId], references: [id], onDelete: Cascade)
+  medium      String // Documentary, journalism, photography
+  followers   Int?
+  notableWork String?
+}
+
+model DiplomatProfile {
+  id             String  @id @default(cuid())
+  speakerId      String  @unique
+  speaker        Speaker @relation(fields: [speakerId], references: [id], onDelete: Cascade)
+  service        String // "IFS", "IAS", "IPS", "IRS"
+  cadre          String?
+  batchYear      Int?
+  postingHistory String?
+}
+
+model ArtistProfile {
+  id         String   @id @default(cuid())
+  speakerId  String   @unique
+  speaker    Speaker  @relation(fields: [speakerId], references: [id], onDelete: Cascade)
+  discipline String
+  guru       String?
+  awards     String[] @default([])
+}
+
+model AuthorProfile {
+  id              String   @id @default(cuid())
+  speakerId       String   @unique
+  speaker         Speaker  @relation(fields: [speakerId], references: [id], onDelete: Cascade)
+  primaryLanguage String?
+  notableWorks    String[] @default([])
+  publishers      String[] @default([])
+}
+
+// ─── Speaker reference (vetting) ─────────────────────────────────────────────
+
+model SpeakerReference {
+  id          String    @id @default(cuid())
+  speakerId   String
+  speaker     Speaker   @relation(fields: [speakerId], references: [id], onDelete: Cascade)
+  name        String
+  org         String
+  email       String
+  phone       String?
+  contactedAt DateTime?
+  responseAt  DateTime?
+  positive    Boolean?
+  notes       String?
+
+  createdAt DateTime @default(now())
+
+  @@index([speakerId])
+}
+
+// ─── Achievement ─────────────────────────────────────────────────────────────
+
+model Achievement {
+  id          String  @id @default(cuid())
+  speakerId   String  @map("athleteId")
+  speaker     Speaker @relation(fields: [speakerId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  year        Int?
+  category    String? // "Sport", "Civilian Honor", "Service Award"
+  evidenceUrl String?
+  isVerified  Boolean @default(false)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([speakerId])
+}
+
+// ─── Verification Document ───────────────────────────────────────────────────
+
+model VerificationDocument {
+  id         String       @id @default(cuid())
+  speakerId  String?
+  speaker    Speaker?     @relation(fields: [speakerId], references: [id], onDelete: Cascade)
+  buyerId    String?
+  buyer      Buyer?       @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  type       DocumentType
+  fileUrl    String
+  fileName   String?
+  reviewedAt DateTime?
+  approved   Boolean?
+  reviewNote String?
+
+  createdAt DateTime @default(now())
+
+  @@index([speakerId])
+  @@index([buyerId])
+  @@index([approved])
+}
+
+// ─── Buyer (demand side) ─────────────────────────────────────────────────────
+
+model Buyer {
+  id     String      @id @default(cuid())
+  user   User?
+  type   BuyerType   @default(SCHOOL)
+  status BuyerStatus @default(PENDING_VERIFICATION)
+
+  // Institution
+  name       String
+  city       String
+  state      String?
+  pincode    String?
+  websiteUrl String?
+
+  // Verification IDs
+  udise          String?
+  aishe          String?
+  gstin          String?
+  pan            String?
+  registrationNo String?
+
+  // Primary contact
+  contactName  String?
+  contactRole  String?
+  contactEmail String? @unique
+  contact      String? // legacy phone field — kept until migration
+
+  bookings  Booking[]
+  reviews   Review[]
+  documents VerificationDocument[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([type, status])
+  @@index([city])
+  @@index([deletedAt])
+  @@map("School")
+}
+
+// ─── Session template ────────────────────────────────────────────────────────
 
 model Session {
-  id          String      @id @default(cuid())
+  id          String         @id @default(cuid())
   title       String
   description String
-  durationMin Int         @default(60)
-  type        SessionType @default(TALK)
+  durationMin Int            @default(60)
+  format      SessionFormat? // optional during transition; legacy `type` still on row
+  type        String         @default("TALK") // legacy column
 
-  bookings    Booking[]
+  bookings Booking[]
 
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  deletedAt   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 // ─── Booking ─────────────────────────────────────────────────────────────────
 
 model Booking {
-  id               String        @id @default(cuid())
-  athleteId        String
-  schoolId         String
-  sessionId        String
-  date             DateTime
-  status           BookingStatus @default(PENDING)
-  audienceSize     Int?
-  schoolType       String?
-  schoolNote       String?
-  // Price locked at booking time — prevents history rewrite if athlete changes fee
-  pricingSnapshot  Decimal?      @db.Decimal(10,2)
+  id String @id @default(cuid())
 
-  athlete          Athlete            @relation(fields: [athleteId], references: [id])
-  school           School             @relation(fields: [schoolId], references: [id])
-  session          Session            @relation(fields: [sessionId], references: [id])
-  escrow           EscrowTransaction?
-  reviews          Review[]
+  speakerId String  @map("athleteId")
+  speaker   Speaker @relation(fields: [speakerId], references: [id])
 
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  deletedAt        DateTime?
+  buyerId String @map("schoolId")
+  buyer   Buyer  @relation(fields: [buyerId], references: [id])
 
-  @@index([athleteId])
-  @@index([schoolId])
+  sessionId String
+  session   Session @relation(fields: [sessionId], references: [id])
+
+  // Schedule
+  date      DateTime
+  altDate   DateTime?
+  timeOfDay TimeOfDay?
+
+  // Format
+  format    SessionFormat?
+  mode      SessionMode?
+  groupSize GroupSize?
+
+  // Audience / context
+  audienceSize Int?
+  buyerOrgType String? @map("schoolType") // legacy "CBSE/ICSE/…" string
+  buyerNote    String? @map("schoolNote")
+  venue        String?
+  topicFocus   String?
+
+  // Pricing snapshot — locked at booking time
+  pricingSnapshot Decimal? @db.Decimal(12, 2)
+
+  // State
+  status        BookingStatus @default(PENDING_PAYMENT)
+  acceptedAt    DateTime?
+  declinedAt    DateTime?
+  declineReason String?
+  completedAt   DateTime?
+  cancelledAt   DateTime?
+  expiresAt     DateTime?
+
+  // Razorpay (payment ids also live on EscrowTransaction)
+  razorpayOrderId String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  escrow  EscrowTransaction?
+  reviews Review[]
+
+  @@index([speakerId])
+  @@index([buyerId])
   @@index([sessionId])
   @@index([date])
   @@index([status])
-  @@index([athleteId, status])  // covers the most common query pattern
+  @@index([speakerId, status])
+  @@index([buyerId, status])
+  @@index([status, expiresAt])
 }
 
 // ─── Escrow ──────────────────────────────────────────────────────────────────
 
 model EscrowTransaction {
-  id                 String       @id @default(cuid())
-  bookingId          String       @unique
-  booking            Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  amount             Decimal      @db.Decimal(10,2)
-  currency           String       @default("INR")
-  status             EscrowStatus @default(PENDING)
+  id        String       @id @default(cuid())
+  bookingId String       @unique
+  booking   Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  amount    Decimal      @db.Decimal(12, 2)
+  currency  String       @default("INR")
+  status    EscrowStatus @default(PENDING)
 
-  // Razorpay identifiers for audit trail, refunds, and transfers (Route)
   razorpayOrderId    String?
   razorpayPaymentId  String?
   razorpayRefundId   String?
-  razorpayTransferId String?      // set when payout is triggered (Razorpay Route)
+  razorpayTransferId String?
 
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
-  deletedAt          DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 // ─── Review ──────────────────────────────────────────────────────────────────
 
 model Review {
-  id        String   @id @default(cuid())
-  athleteId String
-  schoolId  String
-  bookingId String   @unique  // one review per completed booking
-  rating    Int      // 1–5
+  id        String  @id @default(cuid())
+  speakerId String  @map("athleteId")
+  buyerId   String  @map("schoolId")
+  bookingId String  @unique
+  rating    Int
   comment   String?
 
-  athlete   Athlete  @relation(fields: [athleteId], references: [id], onDelete: Cascade)
-  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  speaker Speaker @relation(fields: [speakerId], references: [id], onDelete: Cascade)
+  buyer   Buyer   @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([speakerId])
+  @@index([buyerId])
+}
+
+// ─── Payout (Razorpay Route or manual) ───────────────────────────────────────
+
+model Payout {
+  id                 String       @id @default(cuid())
+  speakerId          String
+  speaker            Speaker      @relation(fields: [speakerId], references: [id])
+  amount             Decimal      @db.Decimal(12, 2)
+  currency           String       @default("INR")
+  status             PayoutStatus @default(SCHEDULED)
+  bookingIds         String[]     @default([])
+  scheduledFor       DateTime
+  paidAt             DateTime?
+  failureReason      String?
+  razorpayTransferId String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  deletedAt DateTime?
 
-  @@index([athleteId])
-  @@index([schoolId])
+  @@index([speakerId, status])
+  @@index([status, scheduledFor])
 }
 
 // ─── Notification ────────────────────────────────────────────────────────────
@@ -244,11 +596,29 @@ model Notification {
   message String
   type    NotificationType
   status  NotificationStatus @default(PENDING)
+  readAt  DateTime?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
   @@index([userId, status])
   @@index([userId])
+}
+
+// ─── Admin audit log ─────────────────────────────────────────────────────────
+
+model AdminAction {
+  id         String  @id @default(cuid())
+  adminId    String
+  admin      User    @relation("AdminUserActions", fields: [adminId], references: [id])
+  action     String
+  targetId   String?
+  targetType String?
+  notes      String?
+
+  createdAt DateTime @default(now())
+
+  @@index([adminId])
+  @@index([targetType, targetId])
 }

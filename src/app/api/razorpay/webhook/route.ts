@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
           where: { id: bookingId },
           select: { id: true, status: true, pricingSnapshot: true },
         });
-        if (!booking || booking.status !== "PENDING") break;
+        if (!booking || booking.status !== "PENDING_PAYMENT") break;
 
         await prisma.escrowTransaction.upsert({
           where: { bookingId },
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
         if (!bookingId) break;
 
         await prisma.booking.updateMany({
-          where: { id: bookingId, status: "PENDING" },
+          where: { id: bookingId, status: "PENDING_PAYMENT" },
           data: { status: "CANCELLED" },
         });
         break;
