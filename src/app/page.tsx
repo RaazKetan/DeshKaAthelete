@@ -20,25 +20,6 @@ import { Container } from "@/components/ui/Container";
 import { Logo } from "@/components/ui/Logo";
 import { Badge } from "@/components/ui/Badge";
 
-const SPORTS = [
-  "Cricket",
-  "Football",
-  "Hockey",
-  "Badminton",
-  "Wrestling",
-  "Boxing",
-  "Athletics",
-  "Archery",
-  "Shooting",
-  "Kabaddi",
-  "Table Tennis",
-  "Tennis",
-  "Weightlifting",
-  "Swimming",
-  "Chess",
-  "Gymnastics",
-];
-
 const TRUST_LOGOS = [
   "DPS Bangalore",
   "Oberoi International",
@@ -47,13 +28,6 @@ const TRUST_LOGOS = [
   "Pathways School",
   "Inventure Academy",
   "TISB",
-];
-
-const STATS = [
-  { value: "500+", label: "Partner schools", sub: "Across 12 cities" },
-  { value: "200+", label: "Verified Crests", sub: "Olympic to national" },
-  { value: "₹2 Cr+", label: "Paid to Crests", sub: "And growing" },
-  { value: "98%", label: "Session success", sub: "Rated by schools" },
 ];
 
 const HOW_IT_WORKS = [
@@ -142,114 +116,93 @@ export default function Home() {
         </Container>
       </header>
 
-      {/* ── Hero ── */}
-      <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28">
-        <div aria-hidden className="absolute inset-x-0 top-0 -z-10 h-[640px] overflow-hidden">
-          <div className="absolute left-1/2 top-32 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-emerald-100/50 blur-[140px]" />
-        </div>
-
-        <Container size="lg" className="text-center">
+      {/* ── Hero — editorial title page ── */}
+      <section className="relative bg-[#f3eee2]">
+        <Container size="xl" className="pt-28 lg:pt-32">
+          {/* Top bar */}
           <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="flex justify-center"
+            className="flex flex-wrap items-baseline gap-x-10 gap-y-1 text-[11px] font-medium uppercase tracking-[0.2em]"
           >
-            <Badge tone="emerald" icon={<span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse-dot" />}>
-              Live in Bangalore, Mumbai &amp; Delhi
-            </Badge>
+            <span className="font-mono text-slate-900">EST. 2026 · NEW DELHI</span>
+            <span className="text-slate-500">A bureau for India's national icons</span>
           </motion.div>
 
+          {/* Headline */}
           <motion.h1
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.05 }}
-            className="mt-8 text-balance text-5xl sm:text-6xl lg:text-7xl font-semibold tracking-[-0.035em] leading-[1.02] text-slate-900"
+            transition={{ duration: 0.7, delay: 0.05 }}
+            className="mt-12 lg:mt-16 text-slate-900 leading-[0.92] tracking-[-0.045em]"
+            style={{ fontWeight: 900, fontSize: "clamp(3.25rem, 13vw, 14rem)" }}
           >
-            India's verified national achievers,
-            <br />
-            <span className="text-emerald-600">one booking away.</span>
+            <span className="block">India&apos;s finest,</span>
+            <span className="block">
+              on{" "}
+              <em className="italic" style={{ fontStyle: "italic", fontWeight: 900 }}>
+                your
+              </em>{" "}
+              stage.
+            </span>
           </motion.h1>
 
+          {/* Body */}
           <motion.p
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.15 }}
-            className="mt-6 text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed"
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="mt-12 max-w-3xl text-lg lg:text-xl leading-relaxed text-slate-800"
           >
-            Book Olympians, Arjuna awardees, and national champions today — with scientists,
-            civil servants, and defence personnel coming next. Aadhaar &amp; Federation verified,
-            payments held in escrow until the session is delivered.
+            Olympians from Haryana. Surgeons from AIIMS. Founders from Indore.
+            Jawans from Pune. Authors from Jaipur.{" "}
+            <span className="font-semibold">Crests</span> is the verified bureau
+            that gets them to your school assembly, college fest, or all-hands —
+            without the WhatsApp circus.
           </motion.p>
 
+          {/* Stats spread */}
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.25 }}
-            className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.35 }}
+            className="mt-16 lg:mt-24 border-y border-slate-900/80 py-8 lg:py-10"
           >
+            <div className="grid grid-cols-3 divide-x divide-slate-300">
+              <Stat n="11"   label="Federations partnered" />
+              <Stat n="340+" label="Sessions delivered" />
+              <Stat n="96%"  label="Renewal rate" />
+            </div>
+          </motion.div>
+
+          {/* Hero CTAs (kept subtle so the editorial layout breathes) */}
+          <div className="mt-12 pb-20 lg:pb-28 flex flex-col sm:flex-row gap-3">
             <Link href="/school/athletes">
               <Button size="lg" rightIcon={<ArrowRight className="h-4 w-4" />}>
                 Browse Crests
               </Button>
             </Link>
             <Link href="/athlete/auth">
-              <Button size="lg" variant="outline">
+              <Button size="lg" variant="outline" className="bg-transparent">
                 Become a Crest
               </Button>
             </Link>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-slate-500"
-          >
-            <span className="inline-flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-slate-400" /> Free for schools to browse</span>
-            <span className="inline-flex items-center gap-1.5"><Lock className="h-3.5 w-3.5 text-slate-400" /> Escrow-protected payments</span>
-            <span className="inline-flex items-center gap-1.5"><Award className="h-3.5 w-3.5 text-slate-400" /> 100% manual KYC</span>
-          </motion.div>
-        </Container>
-
-        {/* Sport marquee — quiet text-only */}
-        <div className="mt-20 overflow-hidden border-y border-slate-200/70 py-4">
-          <div className="flex whitespace-nowrap animate-marquee">
-            {[...SPORTS, ...SPORTS].map((s, i) => (
-              <span key={i} className="mx-6 text-sm font-medium text-slate-400 tracking-tight">
-                {s}
-              </span>
-            ))}
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* ── Trusted by ── */}
       <section className="py-14">
         <Container>
           <p className="text-center text-xs uppercase tracking-[0.18em] text-slate-400 mb-8">
-            Trusted by India's leading institutions
+            Trusted by India&apos;s leading institutions
           </p>
           <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
             {TRUST_LOGOS.map((s) => (
               <span key={s} className="text-sm font-medium text-slate-500">
                 {s}
               </span>
-            ))}
-          </div>
-        </Container>
-      </section>
-
-      {/* ── Stats strip ── */}
-      <section className="py-16">
-        <Container>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-6 border-y border-slate-200 py-12">
-            {STATS.map((s) => (
-              <div key={s.label} className="text-center sm:text-left">
-                <p className="text-4xl font-semibold tracking-tight text-slate-900">{s.value}</p>
-                <p className="mt-2 text-sm font-medium text-slate-700">{s.label}</p>
-                <p className="mt-0.5 text-xs text-slate-500">{s.sub}</p>
-              </div>
             ))}
           </div>
         </Container>
@@ -418,6 +371,20 @@ export default function Home() {
           </div>
         </Container>
       </footer>
+    </div>
+  );
+}
+
+function Stat({ n, label }: { n: string; label: string }) {
+  return (
+    <div className="px-6 first:pl-0 last:pr-0">
+      <p
+        className="text-slate-900 leading-none"
+        style={{ fontWeight: 900, fontSize: "clamp(2.25rem, 5.5vw, 4rem)", letterSpacing: "-0.03em" }}
+      >
+        {n}
+      </p>
+      <p className="mt-3 text-[11px] uppercase tracking-[0.2em] text-slate-500">{label}</p>
     </div>
   );
 }
