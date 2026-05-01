@@ -1,37 +1,57 @@
 @import "tailwindcss";
 
-@theme {
-  --color-brand: #059669;
-  --color-brand-strong: #047857;
-  --color-brand-soft: #d1fae5;
+/* ───────────────────────────────────────────────────────────────────────────
+   Crests — design tokens (modern Indian pop-business)
+   Ported from the prototype's styles.css. Tailwind v4 picks these up via
+   var(--*) referencing in arbitrary classes; the named utilities below are
+   used directly in JSX.
+   ─────────────────────────────────────────────────────────────────────────── */
 
-  --animate-marquee: marquee 40s linear infinite;
-  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
-  --animate-fade-in: fade-in 0.4s ease-out;
-  --animate-rise-in: rise-in 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+:root {
+  /* paper / ink */
+  --paper:    oklch(0.985 0.005 90);
+  --paper-2:  oklch(0.96  0.008 90);
+  --paper-3:  oklch(0.93  0.01  90);
+  --ink:      oklch(0.16  0.01  260);
+  --ink-2:    oklch(0.30  0.012 260);
+  --ink-3:    oklch(0.46  0.012 260);
+  --ink-4:    oklch(0.66  0.01  260);
+  --line:     oklch(0.88  0.008 260);
+  --line-2:   oklch(0.78  0.01  260);
 
-  @keyframes marquee {
-    from { transform: translateX(0); }
-    to   { transform: translateX(-50%); }
-  }
+  /* Accent palette — confident, modern, electric */
+  --kumkum:        oklch(0.48 0.16 240);   /* deep electric blue (primary) */
+  --kumkum-soft:   oklch(0.94 0.04 240);
+  --marigold:      oklch(0.68 0.18 165);   /* electric teal */
+  --marigold-deep: oklch(0.55 0.16 175);
+  --marigold-soft: oklch(0.94 0.05 175);
+  --peacock:       oklch(0.42 0.13 240);
+  --peacock-soft:  oklch(0.92 0.04 240);
+  --neem:          oklch(0.55 0.14 155);
+  --neem-soft:     oklch(0.92 0.04 155);
+  --indigo:        oklch(0.32 0.12 270);
+  --gold:          oklch(0.78 0.14 90);
 
-  @keyframes pulse-dot {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50%      { opacity: 0.55; transform: scale(1.6); }
-  }
+  /* aliases (kept for any legacy refs) */
+  --saffron: var(--marigold);
+  --saffron-deep: var(--marigold-deep);
+  --saffron-soft: var(--marigold-soft);
+  --forest: var(--neem);
+  --forest-soft: var(--neem-soft);
+  --navy: var(--peacock);
+  --navy-soft: var(--peacock-soft);
 
-  @keyframes fade-in {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
+  /* type — modern editorial */
+  --serif:   "Source Serif 4", "Cormorant Garamond", Georgia, serif;
+  --display: "Bricolage Grotesque", "Anek Devanagari", "Helvetica Neue", sans-serif;
+  --sans:    "Bricolage Grotesque", "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono:    "JetBrains Mono", "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
-  @keyframes rise-in {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+  --radius: 2px;
+  --radius-lg: 6px;
 }
 
-/* ───── Athlete portal (kept; used by /athlete/dashboard etc.) ───── */
+/* Athlete portal palette — kept so existing /athlete/dashboard etc. don't break */
 :root {
   --athlete-bg: #080b12;
   --athlete-sidebar-bg: #0d1117;
@@ -43,10 +63,7 @@
   --athlete-accent: #22c55e;
   --athlete-accent-dim: rgba(34, 197, 94, 0.12);
   --athlete-glow: rgba(34, 197, 94, 0.2);
-}
 
-/* ───── School portal ───── */
-:root {
   --school-bg: #f8fafc;
   --school-sidebar-bg: #ffffff;
   --school-surface: #ffffff;
@@ -58,10 +75,13 @@
   --school-accent-dim: rgba(5, 150, 105, 0.08);
 }
 
+/* ─── reset + body ─── */
+
+* { box-sizing: border-box; }
+
 html {
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
-  text-rendering: optimizeLegibility;
 }
 
 body {
@@ -73,32 +93,224 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-::selection {
-  background: rgba(5, 150, 105, 0.18);
-  color: #064e3b;
+button { font: inherit; color: inherit; }
+input, textarea, select { font: inherit; color: inherit; }
+
+::selection { background: var(--marigold-soft); color: var(--ink); }
+
+/* ─── Reusable utility classes (mirrored from prototype) ─── */
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--kumkum);
+  font-weight: 600;
 }
 
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 8px; border: 2px solid transparent; background-clip: padding-box; }
-::-webkit-scrollbar-thumb:hover { background: #cbd5e1; background-clip: padding-box; border: 2px solid transparent; }
+.serif {
+  font-family: var(--display);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.tiro { font-family: var(--serif); font-weight: 400; }
+.mono { font-family: var(--mono); }
 
-/* ───── Shared utilities ───── */
-.step-dot {
-  width: 1.75rem; height: 1.75rem;
-  border-radius: 9999px;
+/* striped placeholder */
+.placeholder {
+  position: relative;
+  background: repeating-linear-gradient(
+    135deg,
+    oklch(0.84 0.04 70) 0 8px,
+    oklch(0.88 0.03 75) 8px 16px
+  );
+  overflow: hidden;
+  isolation: isolate;
+}
+.placeholder::after {
+  content: attr(data-label);
+  position: absolute; inset: 0;
+  display: flex; align-items: flex-end; justify-content: flex-start;
+  padding: 10px 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: oklch(0.35 0.05 50 / 0.7);
+  pointer-events: none;
+}
+
+.silhouette { position: absolute; inset: 0; z-index: 1; }
+
+/* Buttons — bolder, blockier */
+.btn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 13.5px;
   font-weight: 600;
-  transition: all 200ms ease;
+  cursor: pointer;
+  transition: transform 0.08s ease, background 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+  letter-spacing: -0.005em;
+  font-family: var(--sans);
+  text-decoration: none;
 }
-.step-dot.done    { background: #059669; color: #fff; }
-.step-dot.active  { background: #0f172a; color: #fff; }
-.step-dot.pending { background: #f1f5f9; color: #94a3b8; }
+.btn:hover  { background: oklch(0.1 0.04 35); box-shadow: 4px 4px 0 var(--marigold-deep); transform: translate(-1px, -1px); }
+.btn:active { transform: translate(0, 0); box-shadow: 2px 2px 0 var(--marigold-deep); }
+.btn.ghost  { background: transparent; color: var(--ink); border-color: var(--ink); }
+.btn.ghost:hover { background: var(--ink); color: var(--paper); box-shadow: 4px 4px 0 var(--kumkum); }
+.btn.saffron { background: var(--kumkum); color: var(--paper); border-color: var(--kumkum); }
+.btn.saffron:hover { background: oklch(0.42 0.21 28); box-shadow: 4px 4px 0 var(--ink); }
+.btn.sm { padding: 6px 12px; font-size: 12px; }
+.btn.lg { padding: 16px 26px; font-size: 14.5px; }
 
-/* ───── Athlete portal nav (existing) ───── */
+/* Chip — bolder pill */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1.5px solid var(--ink-2);
+  border-radius: 999px;
+  background: var(--paper);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+.chip:hover  { background: var(--paper-2); }
+.chip.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+/* verification tick */
+.tick {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--neem);
+  color: white;
+  font-size: 9px;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 2px var(--paper), 0 0 0 3px var(--neem);
+}
+
+.rule { height: 1px; background: var(--line); border: 0; margin: 0; }
+
+/* Card */
+.card {
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.card:hover { transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--ink); }
+
+/* Layout shell */
+.app { min-height: 100vh; background: var(--paper); }
+
+/* topbar */
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--paper);
+  border-bottom: 2px solid var(--ink);
+}
+.topbar-inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 14px 32px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  cursor: pointer;
+  color: var(--ink);
+  text-decoration: none;
+}
+.nav {
+  display: flex; gap: 28px;
+  font-size: 13.5px;
+  color: var(--ink-2);
+  font-weight: 500;
+}
+.nav a, .nav button {
+  background: transparent;
+  border: 0;
+  padding: 4px 0;
+  cursor: pointer;
+  color: var(--ink-2);
+  position: relative;
+  font-weight: 500;
+  text-decoration: none;
+}
+.nav a:hover, .nav button:hover { color: var(--ink); }
+.nav a.active, .nav button.active { color: var(--ink); }
+.nav a.active::after, .nav button.active::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -19px;
+  height: 3px;
+  background: var(--kumkum);
+}
+.spacer { flex: 1; }
+
+.container-1320 {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+/* decorative */
+.stamp {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  border: 1.5px dashed var(--kumkum);
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--kumkum);
+  background: var(--kumkum-soft);
+}
+
+.dot-row { display: flex; gap: 4px; align-items: center; }
+.dot-row::before, .dot-row::after {
+  content: ''; flex: 1; height: 1px; background: currentColor; opacity: 0.4;
+}
+
+/* marquee for the topbar ribbon */
+@keyframes marq { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+.marquee-track { display: inline-block; animation: marq 50s linear infinite; padding-left: 100%; }
+
+/* mobile */
+@media (max-width: 760px) {
+  .topbar-inner { padding: 12px 18px; gap: 12px; }
+  .nav { display: none; }
+  .container-1320 { padding: 0 18px; }
+}
+
+/* scrollbar */
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: oklch(0 0 0 / 0.15); border-radius: 4px; }
+*::-webkit-scrollbar-thumb:hover { background: oklch(0 0 0 / 0.25); }
+
+/* ─── Athlete + School portal nav (kept for legacy dashboards) ─── */
 .athlete-nav-item {
   display: flex; align-items: center; gap: 12px;
   padding: 11px 14px;
@@ -117,8 +329,6 @@ body {
   color: var(--athlete-accent);
   box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.18);
 }
-
-/* ───── School portal nav (existing) ───── */
 .school-nav-item {
   display: flex; align-items: center; gap: 12px;
   padding: 10px 14px;
@@ -138,6 +348,19 @@ body {
   font-weight: 600;
 }
 
-/* Dark scrollbar for athlete portal */
+/* step dot for onboarding flows */
+.step-dot {
+  width: 1.75rem; height: 1.75rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: all 200ms ease;
+}
+.step-dot.done    { background: var(--neem); color: #fff; }
+.step-dot.active  { background: var(--ink); color: #fff; }
+.step-dot.pending { background: var(--paper-3); color: var(--ink-4); }
+
 .athlete-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); }
-.athlete-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.16); }

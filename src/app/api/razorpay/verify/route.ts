@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
   if (!booking) {
     return NextResponse.json({ ok: false, error: "Booking not found" }, { status: 404 });
   }
-  if (booking.status !== "PENDING") {
+  if (booking.status !== "PENDING_PAYMENT") {
     // already handled by webhook — idempotent
     return NextResponse.json({ ok: true, alreadyProcessed: true });
   }

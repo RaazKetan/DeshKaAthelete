@@ -1,6 +1,3 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -51,41 +48,19 @@ const HOW_IT_WORKS = [
   },
 ];
 
-const TRUST_POINTS = [
-  {
-    icon: ShieldCheck,
-    title: "Manually verified",
-    body:
-      "Aadhaar, Federation registration, and Khelo India IDs are reviewed by humans before a Crest is listed.",
-  },
-  {
-    icon: Award,
-    title: "Elite tier only",
-    body:
-      "Olympians, Arjuna awardees, national champions, and Asian Games medallists. Invitation-driven supply.",
-  },
-  {
-    icon: Lock,
-    title: "Escrow protection",
-    body:
-      "Schools pay the platform, not the Crest. Funds release only after the session is confirmed delivered.",
-  },
-  {
-    icon: Building2,
-    title: "Built for institutions",
-    body:
-      "GST invoices, audit trail, accounts payable workflow, and a relationship manager for every school account.",
-  },
+const HOW_IT_WORKS: [string, string, string][] = [
+  ["01", "Browse",
+    "Filter by topic, language, region, format. Every profile verified by federation or institution."],
+  ["02", "Request",
+    "Send the speaker your date, audience, format, budget. They see it in their dashboard immediately."],
+  ["03", "Confirm",
+    "Most speakers respond in 48h. We handle travel, paperwork, and rider."],
+  ["04", "Host",
+    "Speaker arrives. We follow up with a recap deck and reusable clips for your alumni."],
 ];
 
 export default function Home() {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 16);
-    window.addEventListener("scroll", handler, { passive: true });
-    return () => window.removeEventListener("scroll", handler);
-  }, []);
+  const featured = SPEAKERS.slice(0, 4);
 
   return (
     <div className="relative">
@@ -221,157 +196,296 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="mt-14 grid grid-cols-1 md:grid-cols-3 gap-px rounded-2xl overflow-hidden bg-slate-200 border border-slate-200">
-            {HOW_IT_WORKS.map((step, i) => (
-              <div key={step.title} className="bg-white p-8">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-mono text-slate-400">0{i + 1}</span>
-                  <span className="h-px flex-1 bg-slate-200" />
+            {/* Trust strip */}
+            <div
+              style={{
+                marginTop: 64,
+                padding: "24px 0",
+                borderTop: "2px solid var(--ink)",
+                borderBottom: "2px solid var(--ink)",
+                display: "grid",
+                gridTemplateColumns: "repeat(4, 1fr)",
+                gap: 32,
+              }}
+            >
+              {HERO_STATS.map(([n, label], i) => (
+                <div
+                  key={label}
+                  style={{
+                    borderRight: i < 3 ? "1px solid var(--line-2)" : 0,
+                    paddingLeft: i ? 20 : 0,
+                  }}
+                >
+                  <div
+                    className="serif"
+                    style={{
+                      fontSize: 56,
+                      lineHeight: 1,
+                      color: "var(--ink)",
+                      fontWeight: 700,
+                      letterSpacing: "-0.03em",
+                    }}
+                  >
+                    {n}
+                  </div>
+                  <div className="eyebrow" style={{ marginTop: 10, color: "var(--ink-3)" }}>
+                    {label}
+                  </div>
                 </div>
-                <step.icon className="mt-6 h-5 w-5 text-emerald-600" />
-                <h3 className="mt-4 text-base font-semibold text-slate-900">{step.title}</h3>
-                <p className="mt-2 text-sm text-slate-600 leading-relaxed">{step.body}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </Container>
-      </section>
+        </section>
 
-      {/* ── Trust ── */}
-      <section id="trust" className="py-24 scroll-mt-20 bg-slate-50/60 border-y border-slate-200">
-        <Container>
-          <div className="max-w-2xl">
-            <Badge tone="emerald" icon={<ShieldCheck className="h-3 w-3" />}>Trust &amp; safety</Badge>
-            <h2 className="mt-5 text-3xl sm:text-4xl font-semibold tracking-[-0.025em] text-slate-900">
-              Built for the people who answer to parents and boards.
+        {/* ── CATEGORIES ── */}
+        <section style={{ padding: "40px 0 60px", background: "var(--paper-2)" }}>
+          <div className="container-1320">
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "baseline",
+                marginBottom: 32,
+                gap: 24,
+                flexWrap: "wrap",
+              }}
+            >
+              <div>
+                <div className="eyebrow">Categories</div>
+                <h2
+                  className="serif"
+                  style={{
+                    fontSize: "clamp(36px, 4.5vw, 56px)",
+                    margin: "12px 0 0",
+                    fontWeight: 700,
+                    letterSpacing: "-0.02em",
+                  }}
+                >
+                  Pick the <span style={{ color: "var(--kumkum)" }}>journey</span>.
+                </h2>
+              </div>
+              <Link href="/browse" className="btn ghost">
+                See all categories →
+              </Link>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
+              {CATEGORIES.slice(1).map((c, i) => (
+                <CategoryBlock key={c.id} category={c} index={i} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── FEATURED ── */}
+        <section style={{ padding: "80px 0 40px" }}>
+          <div className="container-1320">
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-end",
+                marginBottom: 48,
+                gap: 24,
+                flexWrap: "wrap",
+              }}
+            >
+              <div style={{ maxWidth: 640 }}>
+                <div className="eyebrow">This month</div>
+                <h2
+                  className="serif"
+                  style={{
+                    fontSize: "clamp(36px, 4.5vw, 56px)",
+                    margin: "12px 0 0",
+                    fontWeight: 700,
+                    letterSpacing: "-0.02em",
+                  }}
+                >
+                  Featured{" "}
+                  <span style={{ fontStyle: "italic", color: "var(--marigold-deep)" }}>
+                    journeys.
+                  </span>
+                </h2>
+              </div>
+              <Motif size={50} color="var(--kumkum)" />
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 24 }}>
+              <FeaturedSpeakerCard speaker={featured[0]} large />
+              <div style={{ display: "grid", gridTemplateRows: "1fr 1fr", gap: 24 }}>
+                <FeaturedSpeakerCard speaker={featured[1]} />
+                <FeaturedSpeakerCard speaker={featured[2]} />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── QUOTE STRIP ── */}
+        <section
+          style={{
+            padding: "60px 0",
+            background: "var(--ink)",
+            color: "var(--paper)",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            className="container-1320"
+            style={{
+              position: "relative",
+              zIndex: 1,
+              display: "grid",
+              gridTemplateColumns: "1fr",
+              gap: 16,
+              alignItems: "center",
+              textAlign: "center",
+            }}
+          >
+            <div className="eyebrow" style={{ color: "var(--marigold)" }}>
+              The premise
+            </div>
+            <div
+              className="serif"
+              style={{
+                fontSize: "clamp(28px, 3.4vw, 44px)",
+                lineHeight: 1.25,
+                fontWeight: 500,
+                maxWidth: 920,
+                margin: "0 auto",
+                letterSpacing: "-0.015em",
+              }}
+            >
+              &ldquo;The people who carried India&apos;s name on their chest, sitting three feet
+              away from the children who&apos;ll carry it next.&rdquo;
+            </div>
+            <div
+              className="mono"
+              style={{
+                fontSize: 11,
+                letterSpacing: "0.15em",
+                color: "var(--ink-4)",
+                marginTop: 8,
+                textTransform: "uppercase",
+              }}
+            >
+              — Crests · Founding note
+            </div>
+          </div>
+        </section>
+
+        {/* ── HOW IT WORKS ── */}
+        <section id="how" style={{ padding: "80px 0", scrollMarginTop: 80 }}>
+          <div className="container-1320">
+            <div className="eyebrow">How it works</div>
+            <h2
+              className="serif"
+              style={{
+                fontSize: "clamp(36px, 4.5vw, 56px)",
+                margin: "12px 0 48px",
+                fontWeight: 700,
+                letterSpacing: "-0.02em",
+              }}
+            >
+              Request to room —{" "}
+              <span style={{ color: "var(--peacock)" }}>days, not months.</span>
             </h2>
-            <p className="mt-4 text-slate-600">
-              Every safeguard exists so a principal can invite an Olympian without writing a single risk memo.
-            </p>
-          </div>
-
-          <div className="mt-14 grid grid-cols-1 md:grid-cols-2 gap-6">
-            {TRUST_POINTS.map((p) => (
-              <div key={p.title} className="bg-white border border-slate-200 rounded-xl p-6">
-                <p.icon className="h-5 w-5 text-emerald-600" />
-                <h3 className="mt-4 text-base font-semibold text-slate-900">{p.title}</h3>
-                <p className="mt-1.5 text-sm text-slate-600 leading-relaxed">{p.body}</p>
-              </div>
-            ))}
-          </div>
-        </Container>
-      </section>
-
-      {/* ── Athlete CTA ── */}
-      <section className="py-24 bg-slate-950 text-white relative overflow-hidden">
-        <div aria-hidden className="absolute inset-0 -z-10">
-          <div className="absolute -top-40 left-1/3 h-[500px] w-[500px] rounded-full bg-emerald-500/10 blur-[120px]" />
-        </div>
-        <Container>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div className="lg:col-span-7">
-              <Badge tone="slate" icon={<Sparkles className="h-3 w-3" />}>For athletes</Badge>
-              <h2 className="mt-6 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-[-0.025em] leading-[1.05]">
-                Your career on the field built a name.
-                <br />
-                <span className="text-emerald-400">Let it earn off it too.</span>
-              </h2>
-              <p className="mt-5 text-slate-300 text-lg max-w-xl leading-relaxed">
-                Set your own fee. Pick your schedule. Get paid securely — within 48 hours of every session, with zero monthly fees and no chasing schools.
-              </p>
-
-              <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-5 max-w-xl">
-                {[
-                  { icon: Wallet, text: "₹8,000 to ₹50,000 per session — you decide" },
-                  { icon: Lock, text: "Payment guaranteed via escrow before you arrive" },
-                  { icon: Users, text: "Live to 500+ partner schools instantly" },
-                  { icon: ShieldCheck, text: "No upfront fee, no monthly subscription" },
-                ].map(({ icon: Icon, text }, i) => (
-                  <div key={i} className="flex items-start gap-3 text-sm text-slate-300">
-                    <Icon className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <span>{text}</span>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(4, 1fr)",
+                gap: 0,
+                border: "2px solid var(--ink)",
+              }}
+            >
+              {HOW_IT_WORKS.map(([num, h, t], i) => (
+                <div
+                  key={num}
+                  style={{
+                    padding: "32px 28px",
+                    borderRight: i < 3 ? "2px solid var(--ink)" : 0,
+                    background: i % 2 === 0 ? "var(--paper)" : "var(--paper-2)",
+                    minHeight: 240,
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 14 }}>
+                    <span
+                      className="mono"
+                      style={{
+                        fontSize: 13,
+                        color: "var(--kumkum)",
+                        letterSpacing: "0.08em",
+                        fontWeight: 600,
+                      }}
+                    >
+                      STEP {num}
+                    </span>
                   </div>
-                ))}
-              </div>
-
-              <div className="mt-10 flex flex-col sm:flex-row gap-3">
-                <Link href="/athlete/auth">
-                  <Button size="lg" rightIcon={<ArrowRight className="h-4 w-4" />}>Apply as an athlete</Button>
-                </Link>
-                <Link href="/athlete/auth">
-                  <Button size="lg" variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
-                    Already a member? Log in
-                  </Button>
-                </Link>
-              </div>
-            </div>
-
-            <div className="lg:col-span-5">
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { v: "15+", l: "Sports covered", s: "Cricket → Archery" },
-                  { v: "₹18K", l: "Avg. session fee", s: "Per 60-min session" },
-                  { v: "500+", l: "Schools onboarded", s: "12 cities" },
-                  { v: "₹2 Cr+", l: "Paid to athletes", s: "And growing" },
-                ].map((s) => (
-                  <div key={s.l} className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
-                    <p className="text-2xl font-semibold tracking-tight">{s.v}</p>
-                    <p className="mt-3 text-xs font-medium text-slate-400">{s.l}</p>
-                    <p className="text-[11px] text-slate-500">{s.s}</p>
-                  </div>
-                ))}
-              </div>
+                  <h3
+                    className="serif"
+                    style={{
+                      fontSize: 28,
+                      margin: "0 0 12px",
+                      fontWeight: 700,
+                      color: "var(--ink)",
+                    }}
+                  >
+                    {h}
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: 14,
+                      color: "var(--ink-2)",
+                      lineHeight: 1.55,
+                      margin: 0,
+                      textWrap: "pretty",
+                    }}
+                  >
+                    {t}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
-        </Container>
-      </section>
+        </section>
 
-      {/* ── Footer ── */}
-      <footer className="bg-white border-t border-slate-200">
-        <Container className="py-14">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
-            <div className="col-span-2 md:col-span-1">
-              <Logo />
-              <p className="mt-4 text-sm text-slate-500 leading-relaxed max-w-xs">
-                India's verified marketplace for national achievers. Built in Bangalore.
-              </p>
+        {/* ── TRUST LOGOS ── */}
+        <section style={{ padding: "40px 0 20px" }}>
+          <div className="container-1320">
+            <div className="dot-row" style={{ color: "var(--ink-3)", marginBottom: 32 }}>
+              <span className="eyebrow" style={{ padding: "0 16px", color: "var(--ink-3)" }}>
+                Trusted by
+              </span>
             </div>
-            <FooterCol
-              title="Platform"
-              links={[
-                { label: "Browse Crests", href: "/school/athletes" },
-                { label: "School portal", href: "/school/auth" },
-                { label: "Crest login", href: "/athlete/auth" },
-              ]}
-            />
-            <FooterCol
-              title="Trust"
-              links={[
-                { label: "How it works", href: "#how" },
-                { label: "Verification", href: "#trust" },
-                { label: "Escrow payments", href: "#trust" },
-              ]}
-            />
-            <FooterCol
-              title="Legal"
-              links={[
-                { label: "Privacy", href: "/policy/privacy" },
-                { label: "Terms", href: "/policy/terms" },
-                { label: "Refunds", href: "/policy/refund" },
-              ]}
-            />
-          </div>
-
-          <div className="mt-12 pt-6 border-t border-slate-200 flex flex-col sm:flex-row gap-3 items-center justify-between text-xs text-slate-500">
-            <p>© {new Date().getFullYear()} Crests by DeshKa · Made in India</p>
-            <div className="flex items-center gap-5">
-              <span className="inline-flex items-center gap-1.5"><Lock className="h-3 w-3" /> SSL secured</span>
-              <span>PCI-DSS compliant</span>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 0 }}>
+              {TRUST_LOGOS.map((name) => (
+                <div
+                  key={name}
+                  style={{
+                    padding: "28px 16px",
+                    textAlign: "center",
+                    borderTop: "1px solid var(--line)",
+                    borderRight: "1px solid var(--line)",
+                    fontFamily: "var(--display)",
+                    fontSize: 16,
+                    fontWeight: 600,
+                    color: "var(--ink-3)",
+                    letterSpacing: "-0.01em",
+                  }}
+                >
+                  {name}
+                </div>
+              ))}
             </div>
           </div>
-        </Container>
-      </footer>
-    </div>
+        </section>
+
+      </main>
+
+      <Footer />
+    </>
   );
 }
 
@@ -391,17 +505,123 @@ function Stat({ n, label }: { n: string; label: string }) {
 
 function FooterCol({ title, links }: { title: string; links: { label: string; href: string }[] }) {
   return (
-    <div>
-      <p className="text-xs font-semibold uppercase tracking-wider text-slate-900">{title}</p>
-      <ul className="mt-4 space-y-2.5">
-        {links.map((l) => (
-          <li key={l.label}>
-            <Link href={l.href} className="text-sm text-slate-500 hover:text-slate-900 transition-colors">
-              {l.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Link
+      href={`/browse?category=${encodeURIComponent(category.id)}`}
+      style={{
+        background: c.bg,
+        color: c.fg,
+        border: "2px solid var(--ink)",
+        padding: "28px 22px",
+        textAlign: "left",
+        cursor: "pointer",
+        display: "flex",
+        flexDirection: "column",
+        gap: 10,
+        minHeight: 180,
+        fontFamily: "inherit",
+        textDecoration: "none",
+        transition: "transform 0.15s, box-shadow 0.15s",
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+        <span className="mono" style={{ fontSize: 11, opacity: 0.8 }}>
+          {String(index + 1).padStart(2, "0")}
+        </span>
+        <span style={{ fontSize: 11, fontFamily: "var(--mono)", opacity: 0.7 }}>
+          {category.count}
+        </span>
+      </div>
+      <div className="serif" style={{ fontSize: 26, fontWeight: 700, lineHeight: 1.05 }}>
+        {category.label}
+      </div>
+    </Link>
+  );
+}
+
+function FeaturedSpeakerCard({ speaker, large }: { speaker: Speaker; large?: boolean }) {
+  return (
+    <Link
+      href={`/speakers/${speaker.id}`}
+      style={{
+        border: "2px solid var(--ink)",
+        overflow: "hidden",
+        cursor: "pointer",
+        background: "var(--paper)",
+        display: "grid",
+        gridTemplateColumns: large ? "1fr" : "0.85fr 1fr",
+        height: large ? "auto" : "100%",
+        transition: "transform 0.2s ease, box-shadow 0.2s ease",
+        textDecoration: "none",
+        color: "inherit",
+      }}
+    >
+      <div
+        style={{
+          position: "relative",
+          borderRight: large ? 0 : "2px solid var(--ink)",
+          borderBottom: large ? "2px solid var(--ink)" : 0,
+        }}
+      >
+        <ImageFrame
+          seed={speaker.seed}
+          ratio={large ? "16/10" : "1/1"}
+          label={speaker.name}
+          accent={speaker.accent}
+        />
+      </div>
+      <div
+        style={{
+          padding: large ? "28px 32px 32px" : "20px 22px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+        }}
+      >
+        <div className="eyebrow">{speaker.handle}</div>
+        <h3
+          className="serif"
+          style={{
+            margin: 0,
+            fontSize: large ? 38 : 24,
+            fontWeight: 700,
+            lineHeight: 1.05,
+            letterSpacing: "-0.02em",
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
+          {speaker.name} {speaker.verified && <Verified size={14} />}
+        </h3>
+        <p
+          style={{
+            margin: 0,
+            fontSize: large ? 16 : 13.5,
+            color: "var(--ink-2)",
+            lineHeight: 1.5,
+            textWrap: "pretty",
+            fontStyle: "italic",
+          }}
+        >
+          &ldquo;{speaker.story.split(".")[0]}.&rdquo;
+        </p>
+        <div
+          style={{
+            marginTop: "auto",
+            paddingTop: 14,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            fontSize: 12,
+            color: "var(--ink-3)",
+            fontFamily: "var(--mono)",
+            borderTop: "1px solid var(--line)",
+          }}
+        >
+          <span>{speaker.location.split("·")[0].trim()}</span>
+          <span style={{ color: "var(--kumkum)", fontWeight: 600 }}>{speaker.feeRange}</span>
+        </div>
+      </div>
+    </Link>
   );
 }

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 // Geist stays around as the immediate fallback for Google Sans (which isn't
@@ -19,12 +18,12 @@ export const metadata: Metadata = {
   description:
     "A verified bureau for India's national icons — Olympians, surgeons, founders, jawans, authors. Book them for your school, college, or all-hands without the WhatsApp circus.",
   keywords: [
-    "Indian athletes",
-    "Olympian coaching",
-    "school workshops",
-    "national achievers",
-    "Khelo India",
+    "national speakers",
+    "speaker bureau India",
+    "Olympic speakers",
+    "school assembly speakers",
     "verified mentors",
+    "Crests bureau",
   ],
 };
 
